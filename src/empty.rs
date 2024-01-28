@@ -40,10 +40,13 @@ pub trait StakingV2ScContract {
     #[storage_mapper("unstaked_time")] // Might not be needed
     fn unstaked_time(&self, user: &ManagedAddress, token_id: &TokenIdentifier, nonce: &u64) -> SingleValueMapper<u64>;
 
+    #[storage_mapper("lastEpisodeClaimed")]
+    fn last_episode_claimed(&self, user: &ManagedAddress) -> SingleValueMapper<u64>;
+
     #[storage_mapper("collections")]
     fn collections(&self) -> SetMapper<TokenIdentifier<Self::Api>>;
 
-    // Dates the beginning of each episode, starting from 1
+    // Dates the beginning of each episode, starting from 0
     #[storage_mapper("episodesTimestamps")]
     fn episodes_timestamps(&self, episode: u64) -> SingleValueMapper<u64>;
 
@@ -61,9 +64,16 @@ pub trait StakingV2ScContract {
         let payment = self.call_value().single_esdt();
         require!(payment.token_identifier == self.ecity_token().get_token_id(), "Only ECITY can be deposited");
 
-        self.current_episode().set(self.current_episode().get() + 1);
-        self.episodes_rewards(self.current_episode().get()).set(payment.amount);
-        self.episodes_timestamps(self.current_episode().get()).set(self.blockchain().get_block_timestamp());
+        let current_episode = self.current_episode().get();
+
+        if current_episode == 0 && self.episodes_rewards(current_episode).get() == BigUint::from(0u8) {
+            // Do nothing if the current episode is zero and has no rewards, since the first episode hasn't started yet
+        } else {
+            self.current_episode().set(current_episode + 1);
+        }
+
+        self.episodes_rewards(current_episode + 1).set(payment.amount);
+        self.episodes_timestamps(current_episode+ 1).set(self.blockchain().get_block_timestamp());
     }
 
     #[payable("*")]
@@ -99,8 +109,8 @@ pub trait StakingV2ScContract {
         self.send().direct_esdt(&caller, &token_id, nonce, &BigUint::from(1u8));
     }
 
-    #[endpoint(claim)]
-    fn claim(&self, episode: u64) {
+    #[endpoint(claimEpisode)]
+    fn claim_episode(&self, episode: u64) {
         let caller = self.blockchain().get_caller();
 
         require!(self.episodes_rewards(episode).get() > BigUint::from(0u8), "Nothing to claim");
@@ -127,11 +137,17 @@ pub trait StakingV2ScContract {
         self.send().direct_esdt(&caller, &self.ecity_token().get_token_id(), 0, &to_be_sent);
     }
 
-    // TODO: Move to constructor
-    #[only_owner]
-    #[endpoint(startFirstEpisode)]
-    fn start_first_episode(&self) {
-        self.current_episode().set(1);
-        self.episodes_timestamps(1).set(self.blockchain().get_block_timestamp());
+    #[endpoint(claim)]
+    fn claim(&self) {
+        // Claims all unclaimed episodes
+        let caller = self.blockchain().get_caller();
+
+        let last_episode_claimed = self.last_episode_claimed(&caller).get();
+
+        for episode in last_episode_claimed..self.current_episode().get() {
+            self.claim_episode(episode);
+        }
+
+        self.last_episode_claimed(&caller).set(self.current_episode().get());
     }
 }
