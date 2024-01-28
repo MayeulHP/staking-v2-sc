@@ -27,17 +27,17 @@ pub trait StakingV2ScContract {
     #[storage_mapper("staked")]
     fn staked(&self, user: &ManagedAddress, token_id: &TokenIdentifier, nonce: &u64) -> SingleValueMapper<BigUint<Self::Api>>;
 
-    /* TODO: Add an iteratable staked tokens
+    // TODO: Add an iteratable staked tokens
     // Using a Vec per user to be able to iterate over all staked tokens
-    #[storage_mapper("staked")]
-    fn staked(&self, user: &ManagedAddress, token_id: &TokenIdentifier) -> VecMapper<(u64, BigUint<Self::Api>)>;
-    */
+    #[storage_mapper("stakedIter")]
+    fn staked_iter(&self, user: &ManagedAddress, token_id: &TokenIdentifier) -> VecMapper<(u64, BigUint<Self::Api>)>; // Contains (nonce, amount)
+    
 
     // TODO: Check how to handle SFTs (Multiple SFTs have the same nonce and token_id)
     #[storage_mapper("stakedTime")]
     fn staked_time(&self, user: &ManagedAddress, token_id: &TokenIdentifier, nonce: &u64) -> SingleValueMapper<u64>;
 
-    #[storage_mapper("unstaked_time")]
+    #[storage_mapper("unstaked_time")] // Might not be needed
     fn unstaked_time(&self, user: &ManagedAddress, token_id: &TokenIdentifier, nonce: &u64) -> SingleValueMapper<u64>;
 
     #[storage_mapper("collections")]
@@ -108,9 +108,23 @@ pub trait StakingV2ScContract {
 
         let total_rewards = self.episodes_rewards(episode).get();
 
-        let user_rewards = total_rewards; //TODO: Not implemented yet
+        let mut to_be_sent = BigUint::from(0u8);
 
-        //TODO Continue here
+        self.collections().iter().for_each(|token_id| {
+            self.staked_iter(&caller, &token_id.clone()).iter().for_each(|(nonce, amount)| {
+                if amount.eq(&BigUint::from(0u8)) {
+                    return;
+                }
+
+                let reward = BigUint::from(10u32); //TODO Calculate reward
+
+                to_be_sent += reward;
+
+                self.staked_time(&caller, &token_id.clone(), &nonce).set(self.episodes_timestamps(episode).get()); // Move the staking time to the beginning of the episode
+            });
+        });
+
+        self.send().direct_esdt(&caller, &self.ecity_token().get_token_id(), 0, &to_be_sent);
     }
 
     // TODO: Move to constructor
