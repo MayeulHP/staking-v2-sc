@@ -19,16 +19,26 @@ pub trait StakingV2ScContract {
     fn init(&self) {}
 
     #[storage_mapper("ecityToken")]
-    fn ecity_token(&self) -> NonFungibleTokenMapper<Self::Api>;
+    fn ecity_token(&self) -> FungibleTokenMapper<Self::Api>;
 
     #[storage_mapper("routerAddress")]
     fn router_address(&self) -> SingleValueMapper<ManagedAddress<Self::Api>>;
 
     #[storage_mapper("staked")]
-    fn staked(&self, user: &ManagedAddress, token_id: &TokenIdentifier, nonce: u64) -> SingleValueMapper<BigUint<Self::Api>>;
+    fn staked(&self, user: &ManagedAddress, token_id: &TokenIdentifier, nonce: &u64) -> SingleValueMapper<BigUint<Self::Api>>;
 
-    #[storage_mapper("stakeTime")]
-    fn stake_time(&self, user: &ManagedAddress) -> SingleValueMapper<u64>;
+    /* TODO: Add an iteratable staked tokens
+    // Using a Vec per user to be able to iterate over all staked tokens
+    #[storage_mapper("staked")]
+    fn staked(&self, user: &ManagedAddress, token_id: &TokenIdentifier) -> VecMapper<(u64, BigUint<Self::Api>)>;
+    */
+
+    // TODO: Check how to handle SFTs (Multiple SFTs have the same nonce and token_id)
+    #[storage_mapper("stakedTime")]
+    fn staked_time(&self, user: &ManagedAddress, token_id: &TokenIdentifier, nonce: &u64) -> SingleValueMapper<u64>;
+
+    #[storage_mapper("unstaked_time")]
+    fn unstaked_time(&self, user: &ManagedAddress, token_id: &TokenIdentifier, nonce: &u64) -> SingleValueMapper<u64>;
 
     #[storage_mapper("collections")]
     fn collections(&self) -> SetMapper<TokenIdentifier<Self::Api>>;
@@ -70,10 +80,11 @@ pub trait StakingV2ScContract {
 
         for payment in payments.iter() {
             require!(self.collections().contains(&payment.token_identifier), "Token not supported");
-            self.staked(&caller, &payment.token_identifier, payment.token_nonce).set(
-                self.staked(&caller, &payment.token_identifier, payment.token_nonce).get() + payment.amount
+
+            self.staked(&caller, &payment.token_identifier, &payment.token_nonce).set(
+                self.staked(&caller, &payment.token_identifier, &payment.token_nonce).get() + payment.amount
             );
-            self.stake_time(&caller).set(self.blockchain().get_block_timestamp());
+            self.staked_time(&caller, &payment.token_identifier, &payment.token_nonce).set(self.blockchain().get_block_timestamp());
         }
     }
 
@@ -81,11 +92,25 @@ pub trait StakingV2ScContract {
     fn unstake_single(&self, token_id: TokenIdentifier, nonce: u64) {
         let caller = self.blockchain().get_caller();
 
-        require!(self.staked(&caller, &token_id, nonce).get() > BigUint::from(0u8), "Nothing to unstake");
+        require!(self.staked(&caller, &token_id, &nonce).get() > BigUint::from(0u8), "Nothing to unstake");
 
-        self.staked(&caller, &token_id, nonce).set(self.staked(&caller, &token_id, nonce).get() - BigUint::from(1u8));
-        self.stake_time(&caller).set(self.blockchain().get_block_timestamp());
+        self.staked(&caller, &token_id, &nonce).set(self.staked(&caller, &token_id, &nonce).get() - BigUint::from(1u8));
+        self.unstaked_time(&caller, &token_id, &nonce).set(self.blockchain().get_block_timestamp()); //TODO Check if more logic is needed for SFTs. (Might need to only update the timestamp if it's the first unstake)
         self.send().direct_esdt(&caller, &token_id, nonce, &BigUint::from(1u8));
+    }
+
+    #[endpoint(claim)]
+    fn claim(&self, episode: u64) {
+        let caller = self.blockchain().get_caller();
+
+        require!(self.episodes_rewards(episode).get() > BigUint::from(0u8), "Nothing to claim");
+        require!(self.current_episode().get() > episode, "Episode not yet available");
+
+        let total_rewards = self.episodes_rewards(episode).get();
+
+        let user_rewards = total_rewards; //TODO: Not implemented yet
+
+        //TODO Continue here
     }
 
     // TODO: Move to constructor
