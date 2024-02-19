@@ -3,7 +3,7 @@ multiversx_sc::derive_imports!();
 
 use crate::structs::{BuildingAttributes, BuildingRarity, BuildingType, CitizenAttributes};
 
-#[elrond_wasm::module]
+#[multiversx_sc::module]
 pub trait UtilsModule: crate::common::CommonModule
 {
 
