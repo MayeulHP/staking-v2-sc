@@ -60,7 +60,23 @@ pub trait StakingV2ScContract:
     #[storage_mapper("claimedPerEpisode")]
     fn claimed_per_episode(&self, episode: u64) -> SingleValueMapper<BigUint<Self::Api>>; // Will be used to allow the Team to claim unclaimable rewards
 
+    /*fn get_genesis_reward(&self, episode: u64, nonce: u64) -> BigUint<Self::Api> {
+        let 
+    }*/
+
     fn reward(&self, episode: u64, token_id: &TokenIdentifier, nonce: u64) -> BigUint<Self::Api> {
+        let gns_tokenid = self.genesis_tokenid().get_token_id();
+        let exp_tokenid = self.expansion_tokenid().get_token_id();
+        let ctzn_tokenid = self.citizen_tokenid().get_token_id();
+
+        let ecity_tokenid = self.ecity_tokenid().get_token_id();
+
+        let episode_rewards = self.episodes_rewards(episode).get();
+
+        let attributes = self.get_building_attributes(Option::Some(token_id.clone()), &nonce);
+
+        //TODO: Fixme
+
         return BigUint::from(0u8);
     }
 

@@ -79,7 +79,7 @@ pub trait UtilsModule: crate::common::CommonModule
                 building_rarity: BuildingRarity::None
             };
         }
-        if token_identifier.unwrap() == self.genesis_tokenidentifier().get_token_id() {
+        if token_identifier.unwrap() == self.genesis_tokenid().get_token_id() {
             return self.get_genesis_building_attributes(nonce);
         } else {
             return self.get_expansion_building_attributes(nonce);
@@ -92,7 +92,7 @@ pub trait UtilsModule: crate::common::CommonModule
         nonce: u64
     ) -> CitizenAttributes<Self::Api>
     {
-        return self.blockchain().get_esdt_token_data(&self.blockchain().get_sc_address(), &self.citizen_tokenidentifier().get_token_id(), nonce).decode_attributes();
+        return self.blockchain().get_esdt_token_data(&self.blockchain().get_sc_address(), &self.citizen_tokenid().get_token_id(), nonce).decode_attributes();
 
     }
 
