@@ -8,7 +8,7 @@ pub mod structs;
 pub mod utils;
 pub mod common;
 
-use crate::structs::{MyEsdtTokenPayment, Building, Citizen, BuildingRarity, BuildingType};
+use crate::structs::{MyEsdtTokenPayment, Building, Citizen, BuildingRarity, BuildingType, CitizenAttributes};
 
 /// An empty contract. To be used as a template when starting a new contract from scratch.
 #[multiversx_sc::contract]
@@ -60,22 +60,81 @@ pub trait StakingV2ScContract:
     #[storage_mapper("claimedPerEpisode")]
     fn claimed_per_episode(&self, episode: u64) -> SingleValueMapper<BigUint<Self::Api>>; // Will be used to allow the Team to claim unclaimable rewards
 
-    /*fn get_genesis_reward(&self, episode: u64, nonce: u64) -> BigUint<Self::Api> {
-        let 
-    }*/
+    fn gns_reward(&self, episode_rewards: BigUint, building_rarity: BuildingRarity) -> BigUint<Self::Api> {
 
-    fn reward(&self, episode: u64, token_id: &TokenIdentifier, nonce: u64) -> BigUint<Self::Api> {
-        let gns_tokenid = self.genesis_tokenid().get_token_id();
-        let exp_tokenid = self.expansion_tokenid().get_token_id();
-        let ctzn_tokenid = self.citizen_tokenid().get_token_id();
+        let building_fund = episode_rewards / BigUint::from(2u8); // 50% of the rewards go to the building fund, the other 50% go to the citizens
+        let gns_fund = building_fund / BigUint::from(2u8); // 50% of the rewards go to the genesis fund, the other 50% go to the expansion fund
+        let gns_rarity_fund = gns_fund.clone() / BigUint::from(2u8); // 50% of the rewards go to the Genesis Classic fund, the other 50% go to the Genesis Legendary fund
 
-        let ecity_tokenid = self.ecity_tokenid().get_token_id();
+        let building_reward = match building_rarity {
+            BuildingRarity::GenesisClassic => gns_rarity_fund / BigUint::from(961u16), // 961 Genesis Classic buildings
+            BuildingRarity::GenesisLegendary => gns_rarity_fund / BigUint::from(31u8), // 31 Genesis Legendary buildings
+            BuildingRarity::TownHallClassic => gns_rarity_fund / BigUint::from(961u16), // 961 Genesis Classic buildings
+            BuildingRarity::TownHallLegendary => gns_rarity_fund / BigUint::from(31u8), // 31 Genesis Legendary buildings,
+            _ => BigUint::from(0u8)
+        };
 
+        return  building_reward;
+    }
+
+    fn exp_reward(&self, episode_rewards: BigUint, building_rarity: BuildingRarity) -> BigUint<Self::Api> {
+        let building_fund = episode_rewards / BigUint::from(2u8); // 50% of the rewards go to the building fund, the other 50% go to the citizens
+        let exp_fund = building_fund / BigUint::from(2u8); // 50% of the rewards go to the expansion fund, the other 50% go to the genesis fund
+        let exp_rarity_fund = exp_fund.clone() / BigUint::from(3u8); // There are 3 rarities of Expansion buildings
+
+        let building_reward = match building_rarity {
+            BuildingRarity::ExpansionClassic => exp_rarity_fund / BigUint::from(3500u16), // 3500 Expansion Classic buildings
+            BuildingRarity::ExpansionRare => exp_rarity_fund / BigUint::from(400u16), // 400 Expansion Rare buildings
+            BuildingRarity::ExpansionLegendary => exp_rarity_fund / BigUint::from(40u8), // 40 Expansion Legendary buildings
+            _ => BigUint::from(0u8)
+        };
+
+        return building_reward;
+    }
+
+    fn ctzn_reward(&self, episode_rewards: BigUint, ctzn_attribues: CitizenAttributes<Self::Api>) -> BigUint<Self::Api> {
+        let ctzn_fund = episode_rewards / BigUint::from(2u8); // 50% of the rewards go to the citizens, the other 50% go to the buildings
+        let ctzn_rarity_fund = ctzn_fund / BigUint::from(3u8); // There are 3 rarities of citizens
+
+        let citizen_reward = match ctzn_attribues.rarity_level {
+            1 => ctzn_rarity_fund / BigUint::from(7120u16), // 1000 Common citizens
+            2 => ctzn_rarity_fund / BigUint::from(800u16), // 100 Rare citizens
+            3 => ctzn_rarity_fund / BigUint::from(80u8), // 10 Legendary citizens
+            _ => BigUint::from(0u8)
+        };
+
+        return citizen_reward;
+    }
+
+    fn building_reward(&self, episode: u64, token_id: &TokenIdentifier, nonce: u64) -> BigUint<Self::Api> {
         let episode_rewards = self.episodes_rewards(episode).get();
 
         let attributes = self.get_building_attributes(Option::Some(token_id.clone()), &nonce);
 
-        //TODO: Fixme
+        // Separate the case between the collections.
+        // If building_rarity is GenesisClassic, GenesisLegendary, TownhallClassic or TownhallLegendary, it's a Genesis building.
+        // If building_rarity is ExpansionClassic, ExpansionRare or ExpansionLegendary, it's an Expansion building.
+        
+        if attributes.building_rarity == BuildingRarity::GenesisClassic ||
+            attributes.building_rarity == BuildingRarity::GenesisLegendary ||
+            attributes.building_rarity == BuildingRarity::TownHallClassic ||
+            attributes.building_rarity == BuildingRarity::TownHallLegendary
+        {
+            return self.gns_reward(episode_rewards, attributes.building_rarity);
+        } else if attributes.building_rarity == BuildingRarity::ExpansionClassic ||
+                    attributes.building_rarity == BuildingRarity::ExpansionLegendary {
+            return episode_rewards * BigUint::from(1u8) / BigUint::from(20u8);
+        }
+
+        return BigUint::from(0u8);
+    }
+
+    fn reward(&self, episode: u64, token_id: &TokenIdentifier, nonce: u64) -> BigUint<Self::Api> {
+        let attributes = self.get_building_attributes(Option::Some(token_id.clone()), &nonce);
+
+        if attributes.building_type != BuildingType::None {
+            return self.building_reward(episode, token_id, nonce);
+        }
 
         return BigUint::from(0u8);
     }
