@@ -20,7 +20,7 @@ pub trait UtilsModule: crate::common::CommonModule
             1 | 2 => BuildingType::Headquarter,
             3 | 4 => BuildingType::Metro,
             5 | 6 => BuildingType::Park,
-            7 | 8 => BuildingType::Police_Station,
+            7 | 8 => BuildingType::PoliceStation,
             9 | 10 => BuildingType::Museum,
             11 | 12 => BuildingType::Hotel,
             13 | 14 => BuildingType::Casino,
@@ -53,12 +53,12 @@ pub trait UtilsModule: crate::common::CommonModule
         let building_type = match nonce {
             1 | 2 | 3 => BuildingType::Casino,
             4 | 5 | 6 => BuildingType::Restaurant,
-            7 | 8 | 9 => BuildingType::Wine_Bar,
+            7 | 8 | 9 => BuildingType::WineBar,
             10 | 11 | 12 => BuildingType::Airport,
-            13 | 14 | 15 => BuildingType::Arcade_Room,
+            13 | 14 | 15 => BuildingType::ArcadeRoom,
             16 | 17 | 18 => BuildingType::Stadium,
-            19 | 20 | 21 => BuildingType::Theme_Park,
-            22 | 23 | 24 => BuildingType::Rocket_Station,
+            19 | 20 | 21 => BuildingType::ThemePark,
+            22 | 23 | 24 => BuildingType::RocketStation,
             _ => unreachable!()
         };
         return BuildingAttributes {

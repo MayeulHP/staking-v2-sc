@@ -66,17 +66,17 @@ pub enum BuildingType {
     Headquarter,
     Metro,
     Park,
-    Police_Station,
+    PoliceStation,
     Museum,
     Hotel,
     Casino,
     Restaurant,
     Airport,
-    Arcade_Room,
+    ArcadeRoom,
     Stadium,
-    Theme_Park,
-    Rocket_Station,
-    Wine_Bar,
+    ThemePark,
+    RocketStation,
+    WineBar,
     TownHall
 }
 

@@ -92,11 +92,14 @@ pub trait StakingV2ScContract:
         return building_reward;
     }
 
-    fn ctzn_reward(&self, episode_rewards: BigUint, ctzn_attribues: CitizenAttributes<Self::Api>) -> BigUint<Self::Api> {
+    fn ctzn_reward(&self, episode: u64, nonce: u64) -> BigUint<Self::Api> {
+        let episode_rewards = self.episodes_rewards(episode).get();
+        let ctzn_attributes = self.get_citizen_attributes(nonce);
+
         let ctzn_fund = episode_rewards / BigUint::from(2u8); // 50% of the rewards go to the citizens, the other 50% go to the buildings
         let ctzn_rarity_fund = ctzn_fund / BigUint::from(3u8); // There are 3 rarities of citizens
 
-        let citizen_reward = match ctzn_attribues.rarity_level {
+        let citizen_reward = match ctzn_attributes.rarity_level {
             1 => ctzn_rarity_fund / BigUint::from(7120u16), // 1000 Common citizens
             2 => ctzn_rarity_fund / BigUint::from(800u16), // 100 Rare citizens
             3 => ctzn_rarity_fund / BigUint::from(80u8), // 10 Legendary citizens
@@ -123,7 +126,7 @@ pub trait StakingV2ScContract:
             return self.gns_reward(episode_rewards, attributes.building_rarity);
         } else if attributes.building_rarity == BuildingRarity::ExpansionClassic ||
                     attributes.building_rarity == BuildingRarity::ExpansionLegendary {
-            return episode_rewards * BigUint::from(1u8) / BigUint::from(20u8);
+            return self.gns_reward(episode_rewards, attributes.building_rarity);
         }
 
         return BigUint::from(0u8);
@@ -134,9 +137,9 @@ pub trait StakingV2ScContract:
 
         if attributes.building_type != BuildingType::None {
             return self.building_reward(episode, token_id, nonce);
+        } else {
+            return self.ctzn_reward(episode, nonce);
         }
-
-        return BigUint::from(0u8);
     }
 
     #[payable("*")]
@@ -221,7 +224,6 @@ pub trait StakingV2ScContract:
                 }
 
                 let reward = self.reward(episode, &token_id.clone(), nonce);
-
 
                 to_be_sent += reward;
 
