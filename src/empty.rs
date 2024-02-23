@@ -35,8 +35,12 @@ pub trait StakingV2ScContract:
     
 
     // TODO: Check how to handle SFTs (Multiple SFTs have the same nonce and token_id)
+    // Might be obsolete
+    // #[storage_mapper("stakedTime")]
+    // fn staked_time(&self, user: &ManagedAddress, token_id: &TokenIdentifier, nonce: &u64) -> SingleValueMapper<u64>;
+
     #[storage_mapper("stakedTime")]
-    fn staked_time(&self, user: &ManagedAddress, token_id: &TokenIdentifier, nonce: &u64) -> SingleValueMapper<u64>;
+    fn staked_time(&self, user: &ManagedAddress) -> SingleValueMapper<u64>;
 
     #[storage_mapper("unstaked_time")] // Might not be needed
     fn unstaked_time(&self, user: &ManagedAddress, token_id: &TokenIdentifier, nonce: &u64) -> SingleValueMapper<u64>;
@@ -59,6 +63,16 @@ pub trait StakingV2ScContract:
 
     #[storage_mapper("claimedPerEpisode")]
     fn claimed_per_episode(&self, episode: u64) -> SingleValueMapper<BigUint<Self::Api>>; // Will be used to allow the Team to claim unclaimable rewards
+
+    // Simple function to cap time differences to 2 weeks
+    fn cap_time(&self, time: u64) -> u64 {
+        let two_weeks = 14 * 24 * 60 * 60; // The length of an episode is 2 weeks, in seconds
+
+        if time > two_weeks {
+            return two_weeks;
+        }
+        return time;
+    }
 
     fn gns_reward(&self, episode_rewards: BigUint, building_rarity: BuildingRarity) -> BigUint<Self::Api> {
 
@@ -142,6 +156,7 @@ pub trait StakingV2ScContract:
         }
     }
 
+    // Depositing ECITY starts and episode, indexed starting from 0
     #[payable("*")]
     #[endpoint(depositEcity)]
     fn deposit_ecity(&self) {
@@ -152,14 +167,14 @@ pub trait StakingV2ScContract:
 
         let current_episode = self.current_episode().get();
 
-        if current_episode == 0 && self.episodes_rewards(current_episode).get() == BigUint::from(0u8) {
-            // Do nothing if the current episode is zero and has no rewards, since the first episode hasn't started yet
+        if current_episode == 0 && self.episodes_timestamps(0u64).get() == 0u64 {
+            // Do nothing if the current episode is zero and hasn't started yet
         } else {
             self.current_episode().set(current_episode + 1);
         }
 
-        self.episodes_rewards(current_episode + 1).set(payment.amount);
-        self.episodes_timestamps(current_episode+ 1).set(self.blockchain().get_block_timestamp());
+        self.episodes_rewards(self.current_episode().get()).set(payment.amount);
+        self.episodes_timestamps(self.current_episode().get()).set(self.blockchain().get_block_timestamp());
     }
 
     #[payable("*")]
@@ -173,6 +188,8 @@ pub trait StakingV2ScContract:
             }).collect();
         
         let caller = self.blockchain().get_caller();
+
+        //TODO: Claim all episodes since stake_time
 
         for payment in payments.iter() {
             require!(self.collections().contains(&payment.token_identifier), "Token not supported");
@@ -193,7 +210,7 @@ pub trait StakingV2ScContract:
                 });
             }
 
-            self.staked_time(&caller, &payment.token_identifier, &payment.token_nonce).set(self.blockchain().get_block_timestamp());
+            self.staked_time(&caller).set(self.blockchain().get_block_timestamp());
         }
     }
 
@@ -208,12 +225,17 @@ pub trait StakingV2ScContract:
         self.send().direct_esdt(&caller, &token_id, nonce, &BigUint::from(1u8));
     }
 
-    #[endpoint(claimEpisode)]
-    fn claim_episode(&self, episode: u64, addr: &ManagedAddress) {
-        require!(self.episodes_rewards(episode).get() > BigUint::from(0u8), "Nothing to claim");
-        require!(self.current_episode().get() > episode, "Episode not yet available");
+    fn claim_ecity(&self, episode: u64, addr: &ManagedAddress) {
+        //require!(self.episodes_rewards(episode).get() > BigUint::from(0u8), "Nothing to claim");
+        //require!(self.current_episode().get() > episode, "Episode not yet available");
 
-        let total_rewards = self.episodes_rewards(episode).get();
+        if self.episodes_rewards(episode).get() <= BigUint::zero() {
+            return;
+        }
+
+        let now = self.blockchain().get_block_timestamp();
+        let stake_time = self.staked_time(&addr).get();
+        let staked_length = self.cap_time(now - stake_time);
 
         let mut to_be_sent = BigUint::from(0u8);
 
@@ -226,10 +248,10 @@ pub trait StakingV2ScContract:
                 let reward = self.reward(episode, &token_id.clone(), nonce);
 
                 to_be_sent += reward;
-
-                self.staked_time(&addr, &token_id.clone(), &nonce).set(self.episodes_timestamps(episode).get()); // Move the staking time to the beginning of the episode
             });
         });
+
+        to_be_sent = to_be_sent * staked_length / BigUint::from(1209600u64); // 1209600 seconds = 2 weeks
 
         self.claimed_per_episode(episode).set(self.claimed_per_episode(episode).get() + &to_be_sent);
 
@@ -244,7 +266,7 @@ pub trait StakingV2ScContract:
         let last_episode_claimed = self.last_episode_claimed(&caller).get();
 
         for episode in last_episode_claimed..self.current_episode().get() {
-            self.claim_episode(episode, &caller);
+            self.claim_ecity(episode, &caller);
         }
 
         self.last_episode_claimed(&caller).set(self.current_episode().get());
