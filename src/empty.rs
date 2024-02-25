@@ -10,7 +10,7 @@ pub mod common;
 
 use crate::structs::{MyEsdtTokenPayment, BuildingRarity, BuildingType};
 
-/// An empty contract. To be used as a template when starting a new contract from scratch.
+/// The staking contract for ctzn.city
 #[multiversx_sc::contract]
 pub trait StakingV2ScContract:
     common::CommonModule
@@ -18,9 +18,6 @@ pub trait StakingV2ScContract:
 {
     #[init]
     fn init(&self) {}
-
-    //#[storage_mapper("ecityToken")]
-    //fn ecity_token(&self) -> FungibleTokenMapper<Self::Api>;
 
     #[storage_mapper("routerAddress")]
     fn router_address(&self) -> SingleValueMapper<ManagedAddress<Self::Api>>;
@@ -32,18 +29,9 @@ pub trait StakingV2ScContract:
     // Using a Vec per user to be able to iterate over all staked tokens
     #[storage_mapper("stakedIter")]
     fn staked_iter(&self, user: &ManagedAddress, token_id: &TokenIdentifier) -> VecMapper<(u64, BigUint<Self::Api>)>; // Contains (nonce, amount)
-    
-
-    // TODO: Check how to handle SFTs (Multiple SFTs have the same nonce and token_id)
-    // Might be obsolete
-    // #[storage_mapper("stakedTime")]
-    // fn staked_time(&self, user: &ManagedAddress, token_id: &TokenIdentifier, nonce: &u64) -> SingleValueMapper<u64>;
 
     #[storage_mapper("stakedTime")]
     fn staked_time(&self, user: &ManagedAddress) -> SingleValueMapper<u64>;
-
-    // #[storage_mapper("unstaked_time")] // Might not be needed
-    // fn unstaked_time(&self, user: &ManagedAddress, token_id: &TokenIdentifier, nonce: &u64) -> SingleValueMapper<u64>;
 
     #[storage_mapper("lastEpisodeClaimed")]
     fn last_episode_claimed(&self, user: &ManagedAddress) -> SingleValueMapper<u64>;
