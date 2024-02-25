@@ -8,7 +8,7 @@ pub mod structs;
 pub mod utils;
 pub mod common;
 
-use crate::structs::{MyEsdtTokenPayment, Building, Citizen, BuildingRarity, BuildingType, CitizenAttributes};
+use crate::structs::{MyEsdtTokenPayment, BuildingRarity, BuildingType};
 
 /// An empty contract. To be used as a template when starting a new contract from scratch.
 #[multiversx_sc::contract]
@@ -42,8 +42,8 @@ pub trait StakingV2ScContract:
     #[storage_mapper("stakedTime")]
     fn staked_time(&self, user: &ManagedAddress) -> SingleValueMapper<u64>;
 
-    #[storage_mapper("unstaked_time")] // Might not be needed
-    fn unstaked_time(&self, user: &ManagedAddress, token_id: &TokenIdentifier, nonce: &u64) -> SingleValueMapper<u64>;
+    // #[storage_mapper("unstaked_time")] // Might not be needed
+    // fn unstaked_time(&self, user: &ManagedAddress, token_id: &TokenIdentifier, nonce: &u64) -> SingleValueMapper<u64>;
 
     #[storage_mapper("lastEpisodeClaimed")]
     fn last_episode_claimed(&self, user: &ManagedAddress) -> SingleValueMapper<u64>;
@@ -189,7 +189,8 @@ pub trait StakingV2ScContract:
         
         let caller = self.blockchain().get_caller();
 
-        //TODO: Claim all episodes since stake_time
+        // Claim all episodes since stake_time
+        self.claim();
 
         for payment in payments.iter() {
             require!(self.collections().contains(&payment.token_identifier), "Token not supported");
@@ -210,7 +211,7 @@ pub trait StakingV2ScContract:
                 });
             }
 
-            self.staked_time(&caller).set(self.blockchain().get_block_timestamp());
+            //self.staked_time(&caller).set(self.blockchain().get_block_timestamp());
         }
     }
 
@@ -220,8 +221,11 @@ pub trait StakingV2ScContract:
 
         require!(self.staked(&caller, &token_id, &nonce).get() > BigUint::from(0u8), "Nothing to unstake");
 
+        // Before unstaking, claim all episodes since stake_time
+        self.claim();
+
         self.staked(&caller, &token_id, &nonce).set(self.staked(&caller, &token_id, &nonce).get() - BigUint::from(1u8));
-        self.unstaked_time(&caller, &token_id, &nonce).set(self.blockchain().get_block_timestamp()); //TODO Check if more logic is needed for SFTs. (Might need to only update the timestamp if it's the first unstake)
+        
         self.send().direct_esdt(&caller, &token_id, nonce, &BigUint::from(1u8));
     }
 
@@ -235,6 +239,12 @@ pub trait StakingV2ScContract:
 
         let now = self.blockchain().get_block_timestamp();
         let stake_time = self.staked_time(&addr).get();
+        
+        // Check that the stake time is in the episode being claimed
+        if stake_time > self.episodes_timestamps(episode).get() + 1209600u64 {
+            return;
+        }
+
         let staked_length = self.cap_time(now - stake_time);
 
         let mut to_be_sent = BigUint::from(0u8);
@@ -254,6 +264,13 @@ pub trait StakingV2ScContract:
         to_be_sent = to_be_sent * staked_length / BigUint::from(1209600u64); // 1209600 seconds = 2 weeks
 
         self.claimed_per_episode(episode).set(self.claimed_per_episode(episode).get() + &to_be_sent);
+
+        // If the episode being claimed is the current episode, set the stake time to now, else set it to the end of the episode being claimed
+        if episode == self.current_episode().get() {
+            self.staked_time(&addr).set(now);
+        } else {
+            self.staked_time(&addr).set(self.episodes_timestamps(episode).get() + 1209600u64);
+        }
 
         self.send().direct_esdt(&addr, &self.ecity_tokenid().get_token_id(), 0, &to_be_sent);
     }
