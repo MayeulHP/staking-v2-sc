@@ -11,6 +11,7 @@ The staking contract for ctzn.city
 - **depositEcity**()
 - **stake**()
 - **unstakeSingle**(token_id: `TokenIdentifier`, nonce: `u64`)
+- **claimEcity**(episode: `u64`, addr: `Address`)
 - **claim**()
 
 ### Readonly

@@ -217,6 +217,7 @@ pub trait StakingV2ScContract:
         self.send().direct_esdt(&caller, &token_id, nonce, &BigUint::from(1u8));
     }
 
+    #[endpoint(claimEcity)]
     fn claim_ecity(&self, episode: u64, addr: &ManagedAddress) {
         //require!(self.episodes_rewards(episode).get() > BigUint::from(0u8), "Nothing to claim");
         //require!(self.current_episode().get() > episode, "Episode not yet available");

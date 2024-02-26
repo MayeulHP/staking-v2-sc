@@ -45,6 +45,17 @@ ARG_1=${2}  # 1: nonce (u64)
 
 }
 
+claimEcity() {
+# Arguments: 
+ARG_0=${1}  # 0: episode (u64)
+ARG_1=${2}  # 1: addr (Address)
+    erdpy contract call ${ADDRESS} \
+        --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
+        --function "claimEcity" \
+        --arguments ${ARG_0} ${ARG_1} 
+
+}
+
 claim() {
     erdpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
