@@ -62,6 +62,16 @@ claim() {
         --function "claim" 
 }
 
+fakeClaim() {
+# Arguments: 
+ARG_0=${1}  # 0: addr (Address)
+    erdpy contract call ${ADDRESS} \
+        --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
+        --function "fakeClaim" \
+        --arguments ${ARG_0} 
+
+}
+
 claimUnclaimable() {
 # Arguments: 
 ARG_0=${1}  # 0: episode (u64)
@@ -73,4 +83,20 @@ ARG_0=${1}  # 0: episode (u64)
 }
 
 # All contract views. Provide arguments as needed (e.g balanceOf 0x1234567890123456789012345678901234567890)
+
+nbStaked() {
+# Arguments: 
+ARG_0=${1}  # 0: user (Address)
+    erdpy contract query ${ADDRESS} \
+        --function "nbStaked" \
+        --proxy=${PROXY} \
+         --arguments ${ARG_0} 
+
+}
+
+nbPlayers() {
+    erdpy contract query ${ADDRESS} \
+        --function "nbPlayers" \
+        --proxy=${PROXY} 
+}
 

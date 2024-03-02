@@ -33,6 +33,14 @@ pub trait StakingV2ScContract:
     #[storage_mapper("stakedTime")]
     fn staked_time(&self, user: &ManagedAddress) -> SingleValueMapper<u64>;
 
+    #[view(nbStaked)]
+    #[storage_mapper("nbStaked")]
+    fn nb_staked(&self, user: &ManagedAddress) -> SingleValueMapper<u64>;
+
+    #[view(nbPlayers)]
+    #[storage_mapper("nbPlayers")]
+    fn nb_players(&self) -> SingleValueMapper<u64>;
+
     #[storage_mapper("lastEpisodeClaimed")]
     fn last_episode_claimed(&self, user: &ManagedAddress) -> SingleValueMapper<u64>;
 
@@ -177,7 +185,7 @@ pub trait StakingV2ScContract:
         
         let caller = self.blockchain().get_caller();
 
-        // Claim all episodes since stake_time
+        // Claim all episodes since stake_time, and update the stake_time
         self.claim();
 
         for payment in payments.iter() {
@@ -189,7 +197,7 @@ pub trait StakingV2ScContract:
 
             // Add the amount to the staked_iter, if it's not already there
             if !self.staked_iter(&caller, &payment.token_identifier).iter().any(|(nonce, _)| nonce == payment.token_nonce) {
-                self.staked_iter(&caller, &payment.token_identifier).push(&(payment.token_nonce, payment.amount));
+                self.staked_iter(&caller, &payment.token_identifier).push(&(payment.token_nonce, payment.amount.clone()));
             } else {
                 // If it's already there, update the amount
                 self.staked_iter(&caller, &payment.token_identifier).iter().for_each(|(nonce, mut amount)| {
@@ -199,7 +207,14 @@ pub trait StakingV2ScContract:
                 });
             }
 
-            //self.staked_time(&caller).set(self.blockchain().get_block_timestamp());
+            // Update the number of players if nessessary
+            if self.nb_staked(&caller).get() == 0 {
+                self.nb_players().set(self.nb_players().get() + 1);
+            }
+
+            let payment_amount_u64 = payment.amount.to_u64().unwrap();
+
+            self.nb_staked(&caller).set(self.nb_staked(&caller).get() + u64::from(payment_amount_u64));
         }
     }
 
@@ -213,6 +228,28 @@ pub trait StakingV2ScContract:
         self.claim();
 
         self.staked(&caller, &token_id, &nonce).set(self.staked(&caller, &token_id, &nonce).get() - BigUint::from(1u8));
+
+        if self.staked(&caller, &token_id, &nonce).get() == BigUint::from(0u8) {
+            let index = self.staked_iter(&caller, &token_id).iter().position(|(n, _)| n == nonce).unwrap();
+            self.staked_iter(&caller, &token_id).swap_remove(index);
+        } else {
+            self.staked_iter(&caller, &token_id).iter().for_each(|(n, mut amount)| {
+                if n == nonce {
+                    if amount > BigUint::from(1u8) {
+                        amount -= BigUint::from(1u8);
+                    } else {
+                        let index = self.staked_iter(&caller, &token_id).iter().position(|(n, _)| n == nonce).unwrap();
+                        self.staked_iter(&caller, &token_id).swap_remove(index);
+                    }
+                }
+            });
+        }
+
+        self.nb_staked(&caller).set(self.nb_staked(&caller).get() - 1);
+
+        if self.nb_staked(&caller).get() == 0 {
+            self.nb_players().set(self.nb_players().get() - 1);
+        }
         
         self.send().direct_esdt(&caller, &token_id, nonce, &BigUint::from(1u8));
     }
@@ -276,6 +313,48 @@ pub trait StakingV2ScContract:
         }
 
         self.last_episode_claimed(&caller).set(self.current_episode().get());
+    }
+
+    //#[view(fakeClaim)]
+    #[endpoint(fakeClaim)]
+    fn fake_claim(&self, addr: &ManagedAddress) -> BigUint<Self::Api> {
+        // Counts the amount of ECITY that can be claimed by an address if the claim function was called
+
+        let last_episode_claimed = self.last_episode_claimed(&addr).get();
+
+        let mut to_be_sent = BigUint::from(0u8);
+
+        for episode in last_episode_claimed..self.current_episode().get() {
+            if self.episodes_rewards(episode).get() <= BigUint::zero() {
+                continue;
+            }
+
+            let now = self.blockchain().get_block_timestamp();
+            let stake_time = self.staked_time(&addr).get();
+            
+            // Check that the stake time is in the episode being claimed
+            if stake_time > self.episodes_timestamps(episode).get() + 1209600u64 {
+                continue;
+            }
+
+            let staked_length = self.cap_time(now - stake_time);
+
+            self.collections().iter().for_each(|token_id| {
+                self.staked_iter(&addr, &token_id.clone()).iter().for_each(|(nonce, amount)| {
+                    if amount.eq(&BigUint::from(0u8)) {
+                        return;
+                    }
+
+                    let reward = self.reward(episode, &token_id.clone(), nonce);
+
+                    to_be_sent += reward;
+                });
+            });
+
+            to_be_sent = to_be_sent * staked_length / BigUint::from(1209600u64); // 1209600 seconds = 2 weeks
+        }
+
+        return to_be_sent;
     }
 
     #[only_owner]
