@@ -173,6 +173,18 @@ pub trait StakingV2ScContract:
         self.episodes_timestamps(self.current_episode().get()).set(self.blockchain().get_block_timestamp());
     }
 
+    // Adding more ECITY to the episode without starting a new one
+    #[payable("*")]
+    #[endpoint(addEcity)]
+    fn add_ecity(&self) {
+        let payment = self.call_value().single_esdt();
+        require!(payment.token_identifier == self.ecity_tokenid().get_token_id(), "Only ECITY can be deposited");
+
+        let current_episode = self.current_episode().get();
+
+        self.episodes_rewards(current_episode).set(self.episodes_rewards(current_episode).get() + payment.amount);
+    }
+
     #[payable("*")]
     #[endpoint(stake)]
     fn stake(&self) {
@@ -252,6 +264,18 @@ pub trait StakingV2ScContract:
         }
         
         self.send().direct_esdt(&caller, &token_id, nonce, &BigUint::from(1u8));
+    }
+
+    // Unstakes a list of tokens
+    #[endpoint(unstake)]
+    fn unstake(&self, tokens: Vec<TokenIdentifier>, nonces: Vec<u64>) {
+        require!(tokens.len() == nonces.len(), "Tokens and nonces must have the same length");
+
+        for i in 0..tokens.len() {
+            let tokenid = tokens.get(i).unwrap();
+            let nonce = nonces.get(i).unwrap();
+            self.unstake_single(tokenid.clone(), nonce.clone());
+        }
     }
 
     #[endpoint(claimEcity)]
