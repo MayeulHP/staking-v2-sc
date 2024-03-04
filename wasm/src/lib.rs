@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                            0
+// Endpoints:                            9
 // Async Callback (empty):               1
-// Total number of exported functions:   2
+// Total number of exported functions:  11
 
 #![no_std]
 
@@ -22,6 +22,15 @@ multiversx_sc_wasm_adapter::endpoints! {
     staking_v2_sc
     (
         init => init
+        nbStaked => nb_staked
+        nbPlayers => nb_players
+        depositEcity => deposit_ecity
+        stake => stake
+        unstakeSingle => unstake_single
+        claimEcity => claim_ecity
+        claim => claim
+        fakeClaim => fake_claim
+        claimUnclaimable => claim_unclaimable
     )
 }
 
