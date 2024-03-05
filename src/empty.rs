@@ -17,7 +17,19 @@ pub trait StakingV2ScContract:
     + utils::UtilsModule
 {
     #[init]
-    fn init(&self) {}
+    fn init(&self,
+            ecity_tokenid: TokenIdentifier,
+            gns_tokenid: TokenIdentifier,
+            exp_tokenid: TokenIdentifier,
+            ctzn_tokenid: TokenIdentifier,
+            router_address: ManagedAddress
+    ) {
+        self.ecity_tokenid().set_if_empty(ecity_tokenid);
+        self.genesis_tokenid().set_if_empty(gns_tokenid);
+        self.expansion_tokenid().set_if_empty(exp_tokenid);
+        self.citizen_tokenid().set_if_empty(ctzn_tokenid);
+        self.router_address().set_if_empty(router_address);
+    }
 
     #[storage_mapper("routerAddress")]
     fn router_address(&self) -> SingleValueMapper<ManagedAddress<Self::Api>>;
