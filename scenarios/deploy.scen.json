@@ -1,0 +1,27 @@
+{
+    "name": "deploy",
+    "comment": "Deploy the staking contract with the necessary arguments",
+    "steps": [
+        {
+            "step": "setState",
+            "accounts": {
+                "address:owner": {
+                    "nonce": "1",
+                    "balance": "0"
+                },
+                "sc:stakingSc": {
+                    "nonce": "0",
+                    "balance": "0",
+                    "code": "file:../output/staking-v2-sc.wasm"
+                }
+            },
+            "newAddresses": [
+                {
+                    "creatorAddress": "address:owner",
+                    "creatorNonce": "1",
+                    "newAddress": "sc:stakingSc"
+                }
+            ]
+        }
+    ]
+}

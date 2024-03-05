@@ -1,0 +1,58 @@
+{
+    "name": "setup",
+    "comment": "Setup the environment for the staking contract",
+    "steps": [
+        {
+            "step": "externalSteps",
+            "path": "deploy.scen.json"
+        },
+        {
+            "step": "setState",
+            "accounts": {
+                "address:router": {
+                    "nonce": "1",
+                    "balance": "0",
+                    "esdt": {
+                        "str:ECITY-2a383a": "7115"
+                    }
+                },
+                "address:staker": {
+                    "nonce": "1",
+                    "balance": "0",
+                    "esdt": {
+                        "str:ECITY-2a383a": "0",
+                        "str:GNSD-2a383a": {
+                            "instances": [
+                                {
+                                    "balance": "1",
+                                    "nonce": "1"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "1",
+            "comment": "Deposit 7115 ECITY through the router, calling depositEcity()",
+            "tx": {
+                "from": "address:router",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "esdtValue": [
+                    {
+                        "tokenIdentifier": "str:ECITY-2a383a",
+                        "value": "7115"
+                    }
+                ],
+                "function": "depositEcity",
+                "gasLimit": "5000000",
+                "gasPrice": "0"
+            }
+
+        }
+
+    ]
+}
