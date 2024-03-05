@@ -21,7 +21,7 @@
                     "balance": "0",
                     "esdt": {
                         "str:ECITY-2a383a": "0",
-                        "str:GNSD-2a383a": {
+                        "str:GNS-2a383a": {
                             "instances": [
                                 {
                                     "balance": "1",
@@ -31,6 +31,9 @@
                         }
                     }
                 }
+            },
+            "currentBlockInfo": {
+                "blockTimestamp": "0"
             }
         },
         {
@@ -51,8 +54,46 @@
                 "gasLimit": "5000000",
                 "gasPrice": "0"
             }
-
+        },
+        {
+            "step": "scCall",
+            "txId": "2",
+            "comment": "Staker stakes 1 GNS, calling stake()",
+            "tx": {
+                "from": "address:staker",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "esdtValue": [
+                    {
+                        "tokenIdentifier": "str:GNS-2a383a",
+                        "nonce": "1",
+                        "value": "1"
+                    }
+                ],
+                "function": "stake",
+                "gasLimit": "5000000",
+                "gasPrice": "0"
+            }
+        },
+        {
+            "step": "setState",
+            "comment": "Set the block timestamp to 1 day",
+            "currentBlockInfo": {
+                "blockTimestamp": "86400"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "3",
+            "comment": "Staker claims the rewards, calling claim()",
+            "tx": {
+                "from": "address:staker",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "function": "claim",
+                "gasLimit": "5000000",
+                "gasPrice": "0"
+            }
         }
-
     ]
 }
