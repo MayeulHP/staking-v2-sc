@@ -268,13 +268,12 @@ pub trait StakingV2ScContract:
 
     // Unstakes a list of tokens
     #[endpoint(unstake)]
-    fn unstake(&self, tokens: Vec<TokenIdentifier>, nonces: Vec<u64>) {
-        require!(tokens.len() == nonces.len(), "Tokens and nonces must have the same length");
+    fn unstake(&self, payments: MultiValueEncoded<(TokenIdentifier, u64, u64)>) {
 
-        for i in 0..tokens.len() {
-            let tokenid = tokens.get(i).unwrap();
-            let nonce = nonces.get(i).unwrap();
+        for (tokenid, nonce, quantity) in payments.into_iter() {
+            for _ in 0..quantity {
             self.unstake_single(tokenid.clone(), nonce.clone());
+            }
         }
     }
 

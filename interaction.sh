@@ -28,6 +28,12 @@ depositEcity() {
         --function "depositEcity" 
 }
 
+addEcity() {
+    erdpy contract call ${ADDRESS} \
+        --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
+        --function "addEcity" 
+}
+
 stake() {
     erdpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
@@ -42,6 +48,16 @@ ARG_1=${2}  # 1: nonce (u64)
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "unstakeSingle" \
         --arguments ${ARG_0} ${ARG_1} 
+
+}
+
+unstake() {
+# Arguments: 
+ARG_0=${1}  # 0: payments (variadic<tuple<TokenIdentifier,u64,u64>>)
+    erdpy contract call ${ADDRESS} \
+        --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
+        --function "unstake" \
+        --arguments ${ARG_0} 
 
 }
 
