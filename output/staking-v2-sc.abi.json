@@ -21,7 +21,28 @@
     ],
     "name": "StakingV2ScContract",
     "constructor": {
-        "inputs": [],
+        "inputs": [
+            {
+                "name": "ecity_tokenid",
+                "type": "TokenIdentifier"
+            },
+            {
+                "name": "gns_tokenid",
+                "type": "TokenIdentifier"
+            },
+            {
+                "name": "exp_tokenid",
+                "type": "TokenIdentifier"
+            },
+            {
+                "name": "ctzn_tokenid",
+                "type": "TokenIdentifier"
+            },
+            {
+                "name": "router_address",
+                "type": "Address"
+            }
+        ],
         "outputs": []
     },
     "endpoints": [
@@ -148,6 +169,61 @@
                 {
                     "name": "episode",
                     "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "setEcityTokenid",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "ecity_tokenid",
+                    "type": "TokenIdentifier"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "setGnsTokenid",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "gns_tokenid",
+                    "type": "TokenIdentifier"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "setExpTokenid",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "exp_tokenid",
+                    "type": "TokenIdentifier"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "setCtznTokenid",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "ctzn_tokenid",
+                    "type": "TokenIdentifier"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "setRouterAddress",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "router_address",
+                    "type": "Address"
                 }
             ],
             "outputs": []

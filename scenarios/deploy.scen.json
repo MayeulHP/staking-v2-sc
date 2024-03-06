@@ -7,7 +7,7 @@
             "accounts": {
                 "address:owner": {
                     "nonce": "1",
-                    "balance": "0"
+                    "balance": "10"
                 },
                 "sc:stakingSc": {
                     "nonce": "0",
@@ -22,6 +22,83 @@
                     "newAddress": "sc:stakingSc"
                 }
             ]
+        },
+        {
+            "step": "scCall",
+            "txId": "ecitySetting",
+            "comment": "Set the ecity token id, calling setEcityTokenid()",
+            "tx": {
+                "from": "address:owner",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "function": "setEcityTokenid",
+                "arguments": [
+                    "str:ECITY-2a383a"
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "gnsSetting",
+            "comment": "Set the gns token id, calling setGnsTokenid()",
+            "tx": {
+                "from": "address:owner",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "function": "setGnsTokenid",
+                "arguments": [
+                    "str:GNS-8fb061"
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+
+            "expect": {
+                "status": "0"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "expSetting",
+            "comment": "Set the exp token id, calling setExpTokenid()",
+            "tx": {
+                "from": "address:owner",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "function": "setExpTokenid",
+                "arguments": [
+                    "str:EXP-aff411"
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "ctznSetting",
+            "comment": "Set the ctzn token id, calling setCtznTokenid()",
+            "tx": {
+                "from": "address:owner",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "function": "setCtznTokenid",
+                "arguments": [
+                    "str:CITIZEN-375553"
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0"
+            }
         }
     ]
 }

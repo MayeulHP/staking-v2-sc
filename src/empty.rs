@@ -29,6 +29,8 @@ pub trait StakingV2ScContract:
         self.expansion_tokenid().set_if_empty(exp_tokenid);
         self.citizen_tokenid().set_if_empty(ctzn_tokenid);
         self.router_address().set_if_empty(router_address);
+        self.current_episode().set_if_empty(0);
+        self.episodes_timestamps(0u64).set_if_empty(0u64);
     }
 
     #[storage_mapper("routerAddress")]
@@ -168,6 +170,13 @@ pub trait StakingV2ScContract:
     #[payable("*")]
     #[endpoint(depositEcity)]
     fn deposit_ecity(&self) {
+        // DEBUG: Verify that all storages are not empty
+        require!(!self.ecity_tokenid().is_empty(), "ECITY token id not set");
+        require!(!self.router_address().is_empty(), "Router address not set");
+        //require!(!self.current_episode().is_empty(), "Current episode not set");
+        //require!(!self.episodes_timestamps(0u64).is_empty(), "First episode timestamp not set");
+        //require!(!self.episodes_rewards(0u64).is_empty(), "First episode rewards not set");
+
         let caller = self.blockchain().get_caller();
         require!(caller == self.router_address().get(), "Only the router can deposit");
         let payment = self.call_value().single_esdt();
@@ -406,5 +415,38 @@ pub trait StakingV2ScContract:
         let to_be_sent = total_rewards - self.claimed_per_episode(episode).get();
 
         self.send().direct_esdt(&caller, &self.ecity_tokenid().get_token_id(), 0, &to_be_sent);
+    }
+
+    // Setters for all that is set in the init function
+    //#[only_owner]
+    #[endpoint(setEcityTokenid)]
+    fn set_ecity_tokenid(&self, ecity_tokenid: TokenIdentifier) {
+        self.ecity_tokenid().set_token_id(ecity_tokenid);
+    }
+
+    //#[only_owner]
+    #[endpoint(setGnsTokenid)]
+    fn set_gns_tokenid(&self, gns_tokenid: TokenIdentifier) {
+        self.genesis_tokenid().set_token_id(gns_tokenid.clone());
+        self.collections().insert(gns_tokenid);
+    }
+
+    //#[only_owner]
+    #[endpoint(setExpTokenid)]
+    fn set_exp_tokenid(&self, exp_tokenid: TokenIdentifier) {
+        self.expansion_tokenid().set_token_id(exp_tokenid);
+    }
+
+    //#[only_owner]
+    #[endpoint(setCtznTokenid)]
+    fn set_ctzn_tokenid(&self, ctzn_tokenid: TokenIdentifier) {
+        self.citizen_tokenid().set_token_id(ctzn_tokenid.clone());
+        self.collections().insert(ctzn_tokenid);
+    }
+
+    //#[only_owner]
+    #[endpoint(setRouterAddress)]
+    fn set_router_address(&self, router_address: ManagedAddress) {
+        self.router_address().set(router_address);
     }
 }
