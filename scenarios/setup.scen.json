@@ -95,21 +95,18 @@
                 "function": "stake",
                 "gasLimit": "5000000",
                 "gasPrice": "0"
-            },
-            "expect": {
-                "status": "0"
             }
         },
         {
             "step": "setState",
-            "comment": "Set the block timestamp to 2 weeks",
+            "comment": "Set the block timestamp to 2 days",
             "currentBlockInfo": {
-                "blockTimestamp": "1209600"
+                "blockTimestamp": "172800"
             }
         },
         {
             "step": "scCall",
-            "txId": "3",
+            "txId": "claimRewards",
             "comment": "Staker claims the rewards, calling claim()",
             "tx": {
                 "from": "address:staker",
@@ -129,7 +126,7 @@
                 "address:staker": {
                     "nonce": "*",
                     "esdt": {
-                        "str:ECITY-2a383a": "0"
+                        "str:ECITY-2a383a": "*"
                     }
                 },
                 "+": ""

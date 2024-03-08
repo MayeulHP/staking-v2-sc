@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           11
+// Endpoints:                           16
 // Async Callback (empty):               1
-// Total number of exported functions:  13
+// Total number of exported functions:  18
 
 #![no_std]
 
@@ -33,6 +33,11 @@ multiversx_sc_wasm_adapter::endpoints! {
         claim => claim
         fakeClaim => fake_claim
         claimUnclaimable => claim_unclaimable
+        setEcityTokenid => set_ecity_tokenid
+        setGnsTokenid => set_gns_tokenid
+        setExpTokenid => set_exp_tokenid
+        setCtznTokenid => set_ctzn_tokenid
+        setRouterAddress => set_router_address
     )
 }
 

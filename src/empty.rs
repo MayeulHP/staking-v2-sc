@@ -209,19 +209,21 @@ pub trait StakingV2ScContract:
     #[payable("*")]
     #[endpoint(stake)]
     fn stake(&self) {
-        let payments: ManagedVec<MyEsdtTokenPayment<Self::Api>> = self.call_value().all_esdt_transfers().iter().map(
+        /*let payments: ManagedVec<MyEsdtTokenPayment<Self::Api>> = self.call_value().all_esdt_transfers().iter().map(
             |p| MyEsdtTokenPayment {
                 token_identifier: p.token_identifier,
                 token_nonce: p.token_nonce,
                 amount: p.amount
             }).collect();
+            */
         
         let caller = self.blockchain().get_caller();
 
         // Claim all episodes since stake_time, and update the stake_time
         self.claim();
 
-        for payment in payments.iter() {
+        //for payment in payments.iter() {
+        for payment in self.call_value().all_esdt_transfers().iter() {
             require!(self.collections().contains(&payment.token_identifier), "Token not supported");
 
             self.staked(&caller, &payment.token_identifier, &payment.token_nonce).set(
@@ -248,6 +250,8 @@ pub trait StakingV2ScContract:
             let payment_amount_u64 = payment.amount.to_u64().unwrap();
 
             self.nb_staked(&caller).set(self.nb_staked(&caller).get() + u64::from(payment_amount_u64));
+
+            sc_print!("Staked {} of token {} with nonce {}", payment.amount, payment.token_identifier, payment.token_nonce);
         }
     }
 
@@ -303,7 +307,9 @@ pub trait StakingV2ScContract:
         //require!(self.episodes_rewards(episode).get() > BigUint::from(0u8), "Nothing to claim");
         //require!(self.current_episode().get() > episode, "Episode not yet available");
 
-        if self.episodes_rewards(episode).get() <= BigUint::zero() {
+        sc_print!("Episode rewards: {}", self.episodes_rewards(episode).get());
+
+        if self.episodes_rewards(episode).get() <= BigUint::zero() || self.current_episode().get() < episode {
             return;
         }
 
@@ -318,6 +324,8 @@ pub trait StakingV2ScContract:
         let staked_length = self.cap_time(now - stake_time);
 
         let mut to_be_sent = BigUint::from(0u8);
+
+        sc_print!("To be sent: {}", to_be_sent);
 
         self.collections().iter().for_each(|token_id| {
             self.staked_iter(&addr, &token_id.clone()).iter().for_each(|(nonce, amount)| {
@@ -342,7 +350,9 @@ pub trait StakingV2ScContract:
             self.staked_time(&addr).set(self.episodes_timestamps(episode).get() + 1209600u64);
         }
 
-        self.send().direct_esdt(&addr, &self.ecity_tokenid().get_token_id(), 0, &to_be_sent);
+        if (to_be_sent > BigUint::from(0u8)) {
+            self.send().direct_esdt(&addr, &self.ecity_tokenid().get_token_id(), 0, &to_be_sent);
+        }
     }
 
     #[endpoint(claim)]
@@ -352,11 +362,15 @@ pub trait StakingV2ScContract:
 
         let last_episode_claimed = self.last_episode_claimed(&caller).get();
 
-        for episode in last_episode_claimed..self.current_episode().get() {
+        sc_print!("Last episode claimed: {}", last_episode_claimed);
+
+        for episode in last_episode_claimed..(self.current_episode().get() + 1u64) {
+            sc_print!("Claiming episode {}", episode);
             self.claim_ecity(episode, &caller);
         }
 
         self.last_episode_claimed(&caller).set(self.current_episode().get());
+        sc_print!("Last episode claimed: {}", self.last_episode_claimed(&caller).get());
     }
 
     //#[view(fakeClaim)]
