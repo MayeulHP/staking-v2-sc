@@ -448,7 +448,8 @@ pub trait StakingV2ScContract:
     //#[only_owner]
     #[endpoint(setExpTokenid)]
     fn set_exp_tokenid(&self, exp_tokenid: TokenIdentifier) {
-        self.expansion_tokenid().set_token_id(exp_tokenid);
+        self.expansion_tokenid().set_token_id(exp_tokenid.clone());
+        self.collections().insert(exp_tokenid);
     }
 
     //#[only_owner]
