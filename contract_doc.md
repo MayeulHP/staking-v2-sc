@@ -29,7 +29,13 @@ The staking contract for ctzn.city
     Used to claim all episodes that haven't been claimed yet.  
 
 - **fakeClaim**(addr: `Address`) -> `BigUint`  
-    Used to know how much can be claimed by an address  
+    Used to know how much can be claimed by an address 
+    
+- **setEcityTokenid**(ecity_tokenid: `TokenIdentifier`)
+- **setGnsTokenid**(gns_tokenid: `TokenIdentifier`)
+- **setExpTokenid**(exp_tokenid: `TokenIdentifier`)
+- **setCtznTokenid**(ctzn_tokenid: `TokenIdentifier`)
+- **setRouterAddress**(router_address: `Address`)
 
 ### Readonly
 - **nbStaked**(user: `Address`) -> `u64`  
