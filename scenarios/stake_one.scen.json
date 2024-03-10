@@ -1,0 +1,147 @@
+{
+    "name": "stake_one",
+    "comment": "One user stakes one GNS and claims the rewards after 2 days",
+    "steps": [
+        {
+            "step": "externalSteps",
+            "path": "deploy.scen.json"
+        },
+        {
+            "step": "setState",
+            "accounts": {
+                "address:router": {
+                    "nonce": "1",
+                    "balance": "0",
+                    "esdt": {
+                        "str:ECITY-2a383a": "7115000000000000000000"
+                    }
+                },
+                "address:staker": {
+                    "nonce": "1",
+                    "balance": "0",
+                    "esdt": {
+                        "str:ECITY-2a383a": "0",
+                        "str:GNS-8fb061": {
+                            "instances": [
+                                {
+                                    "balance": "1",
+                                    "nonce": "1"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "currentBlockInfo": {
+                "blockTimestamp": "0"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "routerSetting",
+            "comment": "Set the router contract address, calling setRouterAddress()",
+            "tx": {
+                "from": "address:owner",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "function": "setRouterAddress",
+                "arguments": [
+                    "address:router"
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "depositEcity",
+            "comment": "Deposit 7115 ECITY through the router, calling depositEcity()",
+            "tx": {
+                "from": "address:router",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "esdtValue": [
+                    {
+                        "tokenIdentifier": "str:ECITY-2a383a",
+                        "value": "7115000000000000000000"
+                    }
+                ],
+                "function": "depositEcity",
+                "gasLimit": "5000000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "stakeGns",
+            "comment": "Staker stakes 1 GNS, calling stake()",
+            "tx": {
+                "from": "address:staker",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "esdtValue": [
+                    {
+                        "tokenIdentifier": "str:GNS-8fb061",
+                        "nonce": "1",
+                        "value": "1"
+                    }
+                ],
+                "function": "stake",
+                "gasLimit": "5000000000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0"
+            }
+        },
+        {
+            "step": "setState",
+            "comment": "Set the block timestamp to 2 days",
+            "currentBlockInfo": {
+                "blockTimestamp": "172800"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "claimRewards",
+            "comment": "Staker claims the rewards, calling claim()",
+            "tx": {
+                "from": "address:staker",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "function": "claim",
+                "gasLimit": "5000000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0"
+            }
+        },
+        {
+            "step": "checkState",
+            "accounts": {
+                "address:staker": {
+                    "nonce": "*",
+                    "esdt": {
+                        "str:ECITY-2a383a": "*",
+                        "str:GNS-8fb061": {
+                            "instances": [
+                                {
+                                    "balance": "0",
+                                    "nonce": "1"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "+": ""
+            }
+        }
+    ]
+}
