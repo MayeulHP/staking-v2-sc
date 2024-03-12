@@ -8,6 +8,23 @@ fn world() -> ScenarioWorld {
 }
 
 #[test]
-fn empty_rs() {
+fn long_stake_rs() {
     world().run("scenarios/setup.scen.json");
 }
+
+#[test]
+fn stake_one() {
+    world().run("scenarios/stake_one.scen.json");
+}
+
+#[test]
+fn complex_stake() {
+    world().run("scenarios/complex_stake.scen.json");
+}
+
+/*
+#[test]
+fn long_stake() {
+    world().run("scenarios/long_stake.scen.json");
+}
+*/
