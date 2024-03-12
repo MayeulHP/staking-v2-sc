@@ -127,9 +127,9 @@
             "step": "checkState",
             "accounts": {
                 "address:staker": {
-                    "nonce": "*",
+                    "nonce": "3",
                     "esdt": {
-                        "str:ECITY-2a383a": "*",
+                        "str:ECITY-2a383a": "132209751746692433",
                         "str:GNS-8fb061": {
                             "instances": [
                                 {

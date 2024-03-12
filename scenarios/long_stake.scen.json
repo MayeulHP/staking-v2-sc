@@ -1,0 +1,402 @@
+{
+    "name": "long_stake",
+    "comment": "Two players staking NFTs, claiming rewards after different durations, and then unstaking.",
+    "steps": [
+        {
+            "step": "externalSteps",
+            "path": "deploy.scen.json"
+        },
+        {
+            "step": "setState",
+            "accounts": {
+                "address:router": {
+                    "nonce": "1",
+                    "balance": "0",
+                    "esdt": {
+                        "str:ECITY-2a383a": "7115000000000000000000"
+                    }
+                },
+                "address:player1": {
+                    "nonce": "1",
+                    "balance": "0",
+                    "esdt": {
+                        "str:GNS-8fb061": {
+                            "instances": [
+                                {
+                                    "balance": "1",
+                                    "nonce": "1"
+                                },
+                                {
+                                    "balance": "1",
+                                    "nonce": "3"
+                                }
+                            ]
+                        },
+                        "str:EXP-aff411": {
+                            "instances": [
+                                {
+                                    "balance": "1",
+                                    "nonce": "1"
+                                },
+                                {
+                                    "balance": "1",
+                                    "nonce": "4"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "address:player2": {
+                    "nonce": "1",
+                    "balance": "0",
+                    "esdt": {
+                        "str:GNS-8fb061": {
+                            "instances": [
+                                {
+                                    "balance": "1",
+                                    "nonce": "2"
+                                },
+                                {
+                                    "balance": "1",
+                                    "nonce": "4"
+                                }
+                            ]
+                        },
+                        "str:EXP-aff411": {
+                            "instances": [
+                                {
+                                    "balance": "1",
+                                    "nonce": "3"
+                                },
+                                {
+                                    "balance": "1",
+                                    "nonce": "6"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "currentBlockInfo": {
+                "blockTimestamp": "1000"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "routerSetting",
+            "comment": "Set the router contract address, calling setRouterAddress()",
+            "tx": {
+                "from": "address:owner",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "function": "setRouterAddress",
+                "arguments": [
+                    "address:router"
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "staker1Stake",
+            "comment": "Player 1 staking NFTs, calling stake()",
+            "tx": {
+                "from": "address:player1",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "esdtValue": [
+                    {
+                        "tokenIdentifier": "str:GNS-8fb061",
+                        "nonce": "1",
+                        "value": "1"
+                    },
+                    {
+                        "tokenIdentifier": "str:GNS-8fb061",
+                        "nonce": "3",
+                        "value": "1"
+                    },
+                    {
+                        "tokenIdentifier": "str:EXP-aff411",
+                        "nonce": "1",
+                        "value": "1"
+                    },
+                    {
+                        "tokenIdentifier": "str:EXP-aff411",
+                        "nonce": "4",
+                        "value": "1"
+                    }
+                ],
+                "function": "stake",
+                "gasLimit": "5000000000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0"
+            }
+        },
+        {
+            "step": "setState",
+            "comment": "Set the block timestamp to 3 weeks later",
+            "currentBlockInfo": {
+                "blockTimestamp": "3628800"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "claimRewardsPlayer1",
+            "comment": "Player 1 claims rewards after 3 weeks, calling claim()",
+            "tx": {
+                "from": "address:player1",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "function": "claim",
+                "gasLimit": "5000000000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "staker2Stake",
+            "comment": "Player 2 staking NFTs, calling stake()",
+            "tx": {
+                "from": "address:player2",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "esdtValue": [
+                    {
+                        "tokenIdentifier": "str:GNS-8fb061",
+                        "nonce": "2",
+                        "value": "1"
+                    },
+                    {
+                        "tokenIdentifier": "str:GNS-8fb061",
+                        "nonce": "4",
+                        "value": "1"
+                    },
+                    {
+                        "tokenIdentifier": "str:EXP-aff411",
+                        "nonce": "3",
+                        "value": "1"
+                    },
+                    {
+                        "tokenIdentifier": "str:EXP-aff411",
+                        "nonce": "6",
+                        "value": "1"
+                    }
+                ],
+                "function": "stake",
+                "gasLimit": "5000000000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0"
+            }
+        },
+        {
+            "step": "setState",
+            "comment": "Set the block timestamp to 5 weeks later",
+            "currentBlockInfo": {
+                "blockTimestamp": "6048000"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "claimRewardsPlayer2",
+            "comment": "Player 2 claims rewards after 5 weeks, calling claim()",
+            "tx": {
+                "from": "address:player2",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "function": "claim",
+                "gasLimit": "5000000000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "unstakePlayer1_1",
+            "comment": "Player 1 unstakes one NFT by giving its tokenid and nonce, calling unstake()",
+            "tx": {
+                "from": "address:player1",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "function": "unstakeSingle",
+                "arguments": [
+                    "str:GNS-8fb061",
+                    "1"
+                ],
+                "gasLimit": "5000000000000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0",
+                "gas": "*",
+                "refund": "*"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "unstakePlayer1_2",
+            "comment": "Player 1 unstakes another NFT by giving its tokenid and nonce, calling unstake()",
+            "tx": {
+                "from": "address:player1",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "function": "unstakeSingle",
+                "arguments": [
+                    "str:GNS-8fb061",
+                    "3"
+                ],
+                "gasLimit": "5000000000000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0",
+                "gas": "*",
+                "refund": "*"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "unstakePlayer1_3",
+            "comment": "Player 1 unstakes NFTs, calling unstake()",
+            "tx": {
+                "from": "address:player1",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "function": "unstakeSingle",
+                "arguments": [
+                    "str:EXP-aff411",
+                    "1"
+                ],
+                "gasLimit": "5000000000000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0",
+                "gas": "*",
+                "refund": "*"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "unstakePlayer1_4",
+            "comment": "Player 1 unstakes another NFT by giving its tokenid and nonce, calling unstake()",
+            "tx": {
+                "from": "address:player1",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "function": "unstakeSingle",
+                "arguments": [
+                    "str:EXP-aff411",
+                    "4"
+                ],
+                "gasLimit": "5000000000000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0",
+                "gas": "*",
+                "refund": "*"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "unstakePlayer2_1",
+            "comment": "Player 2 unstakes 1 NFT calling unstake()",
+            "tx": {
+                "from": "address:player2",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "function": "unstakeSingle",
+                "arguments": [
+                    "str:GNS-8fb061",
+                    "2"
+                ],
+                "gasLimit": "5000000000000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0",
+                "gas": "*",
+                "refund": "*"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "unstakePlayer2_2",
+            "comment": "Player 2 unstakes another NFT calling unstake()",
+            "tx": {
+                "from": "address:player2",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "function": "unstakeSingle",
+                "arguments": [
+                    "str:GNS-8fb061",
+                    "4"
+                ],
+                "gasLimit": "5000000000000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0",
+                "gas": "*",
+                "refund": "*"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "unstakePlayer2_3",
+            "comment": "Player 2 unstakes NFTs calling unstake()",
+            "tx": {
+                "from": "address:player2",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "function": "unstakeSingle",
+                "arguments": [
+                    "str:EXP-aff411",
+                    "3"
+                ],
+                "gasLimit": "5000000000000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0",
+                "gas": "*",
+                "refund": "*"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "unstakePlayer2_4",
+            "comment": "Player 2 unstakes another NFT calling unstake()",
+            "tx": {
+                "from": "address:player2",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "function": "unstakeSingle",
+                "arguments": [
+                    "str:EXP-aff411",
+                    "6"
+                ],
+                "gasLimit": "5000000000000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0",
+                "gas": "*",
+                "refund": "*"
+            }
+        }
+    ]
+}

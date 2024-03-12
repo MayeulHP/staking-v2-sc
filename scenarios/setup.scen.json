@@ -1,6 +1,6 @@
 {
-    "name": "complex_stake",
-    "comment": "Two users with multiple NFTs of each collection, staking and claiming rewards at different times during the staking period",
+    "name": "long_stake",
+    "comment": "Two users with multiple NFTs of each collection, staking and claiming rewards during the next period. Also unstaking later.",
     "steps": [
         {
             "step": "externalSteps",
@@ -209,15 +209,15 @@
         },
         {
             "step": "setState",
-            "comment": "Set the block timestamp to 1 week later",
+            "comment": "Set the block timestamp to 3 weeks later",
             "currentBlockInfo": {
-                "blockTimestamp": "259600"
+                "blockTimestamp": "1988200"
             }
         },
         {
             "step": "scCall",
             "txId": "claimRewards",
-            "comment": "Staker claims the rewards, calling claim()",
+            "comment": "StakerClassics claims the rewards, calling claim()",
             "tx": {
                 "from": "address:stakerClassics",
                 "to": "sc:stakingSc",
@@ -233,7 +233,7 @@
         {
             "step": "scCall",
             "txId": "claimRewards",
-            "comment": "Staker claims the rewards, calling claim()",
+            "comment": "StakerLegendary claims the rewards, calling claim()",
             "tx": {
                 "from": "address:stakerLegendaries",
                 "to": "sc:stakingSc",
@@ -252,7 +252,7 @@
                 "address:stakerClassics": {
                     "nonce": "3",
                     "esdt": {
-                        "str:ECITY-2a383a": "395711131964058602",
+                        "str:ECITY-2a383a": "1850936524453694068",
                         "str:GNS-8fb061": {
                             "instances": [
                                 {
@@ -282,7 +282,7 @@
                 "address:stakerLegendaries": {
                     "nonce": "3",
                     "esdt": {
-                        "str:ECITY-2a383a": "4070040482590885816",
+                        "str:ECITY-2a383a": "57379032258064516128",
                         "str:GNS-8fb061": {
                             "instances": [
                                 {
@@ -310,6 +310,27 @@
                     }
                 },
                 "+": ""
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "unstakeClassics",
+            "comment": "StakerClassics unstakes his NFTs, calling unstake(tuple<TokenIdentifier, u64, u64>)",
+            "tx": {
+                "from": "address:stakerClassics",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "function": "unstakeSingle",
+                "arguments": [
+                    "str:GNS-8fb061", "1"
+                ],
+                "gasLimit": "5000000000000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0",
+                "gas": "*",
+                "refund": "*"
             }
         }
     ]
