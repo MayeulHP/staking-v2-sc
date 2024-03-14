@@ -8,7 +8,7 @@ pub mod structs;
 pub mod utils;
 pub mod common;
 
-use crate::structs::{MyEsdtTokenPayment, BuildingRarity, BuildingType};
+use crate::structs::{BuildingRarity, BuildingType};
 
 /// The staking contract for ctzn.city
 #[multiversx_sc::contract]
@@ -39,13 +39,8 @@ pub trait StakingV2ScContract:
     #[storage_mapper("staked")]
     fn staked(&self, user: &ManagedAddress, token_id: &TokenIdentifier, nonce: &u64) -> SingleValueMapper<BigUint<Self::Api>>;
 
-    // TODO: Add an iteratable staked tokens
-    // Using a Vec per user to be able to iterate over all staked tokens
-    #[storage_mapper("stakedIter")]
-    fn staked_iter(&self, user: &ManagedAddress, token_id: &TokenIdentifier) -> VecMapper<(u64, BigUint<Self::Api>)>; // Contains (nonce, amount)
-
     #[storage_mapper("stakedIted2")]
-    fn staked_iter2(&self, user: &ManagedAddress, token_id: &TokenIdentifier) -> SetMapper<(u64, BigUint<Self::Api>)>;
+    fn staked_iter(&self, user: &ManagedAddress, token_id: &TokenIdentifier) -> SetMapper<(u64, BigUint<Self::Api>)>;
 
     #[storage_mapper("stakedTime")]
     fn staked_time(&self, user: &ManagedAddress) -> SingleValueMapper<u64>;
@@ -212,13 +207,6 @@ pub trait StakingV2ScContract:
     #[payable("*")]
     #[endpoint(stake)]
     fn stake(&self) {
-        /*let payments: ManagedVec<MyEsdtTokenPayment<Self::Api>> = self.call_value().all_esdt_transfers().iter().map(
-            |p| MyEsdtTokenPayment {
-                token_identifier: p.token_identifier,
-                token_nonce: p.token_nonce,
-                amount: p.amount
-            }).collect();
-            */
         
         let caller = self.blockchain().get_caller();
 
@@ -234,11 +222,11 @@ pub trait StakingV2ScContract:
             );
 
             // Add the amount to the staked_iter, if it's not already there
-            if !self.staked_iter2(&caller, &payment.token_identifier).iter().any(|(nonce, _)| nonce == payment.token_nonce) {
-                self.staked_iter2(&caller, &payment.token_identifier).insert((payment.token_nonce, BigUint::from(1u8)));
+            if !self.staked_iter(&caller, &payment.token_identifier).iter().any(|(nonce, _)| nonce == payment.token_nonce) {
+                self.staked_iter(&caller, &payment.token_identifier).insert((payment.token_nonce, BigUint::from(1u8)));
             } else {
                 // If it's already there, update the amount
-                self.staked_iter2(&caller, &payment.token_identifier).iter().for_each(|(nonce, mut amount)| {
+                self.staked_iter(&caller, &payment.token_identifier).iter().for_each(|(nonce, mut amount)| {
                     if nonce == payment.token_nonce {
                         amount += &payment.amount;
                     }
@@ -270,37 +258,13 @@ pub trait StakingV2ScContract:
 
         self.staked(&caller, &token_id, &nonce).set(self.staked(&caller, &token_id, &nonce).get() - BigUint::from(1u8));
 
-
-        // Something breaks in the following code
         if self.staked(&caller, &token_id, &nonce).get() == BigUint::from(0u8) {
-            self.staked_iter2(&caller, &token_id).remove(&(nonce, BigUint::from(1u8)));
-
-            /*
-            let index = self.staked_iter2(&caller, &token_id).iter().position(|(n, _)| n == nonce).unwrap();
-            sc_print!("Removing index {}", index);
-            sc_print!("staked_iter length: {}", self.staked_iter(&caller, &token_id).len());
-
-            // Print the content of the staked_iter
-            self.staked_iter(&caller, &token_id).iter().for_each(|(n, amount)| {
-                sc_print!("{}: {}", n, amount);
-            });
-            self.staked_iter(&caller, &token_id).swap_remove(index); // THIS LINE BREAKS
-            */
+            // If the amount is zero, remove the nonce from the staked_iter
+            self.staked_iter(&caller, &token_id).remove(&(nonce, BigUint::from(1u8)));
         } else {
-
-            self.staked_iter2(&caller, &token_id).remove(&(nonce, self.staked(&caller, &token_id, &nonce).get() + BigUint::from(1u8)));
-
-            /* 
-            self.staked_iter(&caller, &token_id).iter().for_each(|(n, mut amount)| {
-                if n == nonce {
-                    if amount > BigUint::from(1u8) {
-                        amount -= BigUint::from(1u8);
-                    } else {
-                        let index = self.staked_iter(&caller, &token_id).iter().position(|(n, _)| n == nonce).unwrap();
-                        self.staked_iter(&caller, &token_id).swap_remove(index);
-                    }
-                }
-            });*/
+            // Remove the old amount and add the new one
+            self.staked_iter(&caller, &token_id).remove(&(nonce, self.staked(&caller, &token_id, &nonce).get() + BigUint::from(1u8)));
+            self.staked_iter(&caller, &token_id).insert((nonce, self.staked(&caller, &token_id, &nonce).get()));
         }
 
         self.nb_staked(&caller).set(self.nb_staked(&caller).get() - 1);
@@ -325,8 +289,6 @@ pub trait StakingV2ScContract:
 
     #[endpoint(claimEcity)]
     fn claim_ecity(&self, episode: u64, addr: &ManagedAddress) {
-        //require!(self.episodes_rewards(episode).get() > BigUint::from(0u8), "Nothing to claim");
-        //require!(self.current_episode().get() > episode, "Episode not yet available");
 
         sc_print!("Episode rewards: {}", self.episodes_rewards(episode).get());
 
@@ -349,7 +311,7 @@ pub trait StakingV2ScContract:
         sc_print!("To be sent: {}", to_be_sent);
 
         self.collections().iter().for_each(|token_id| {
-            self.staked_iter2(&addr, &token_id.clone()).iter().for_each(|(nonce, amount)| {
+            self.staked_iter(&addr, &token_id.clone()).iter().for_each(|(nonce, amount)| {
                 if amount.eq(&BigUint::from(0u8)) {
                     return;
                 }
@@ -419,7 +381,7 @@ pub trait StakingV2ScContract:
             let staked_length = self.cap_time(now - stake_time);
 
             self.collections().iter().for_each(|token_id| {
-                self.staked_iter2(&addr, &token_id.clone()).iter().for_each(|(nonce, amount)| {
+                self.staked_iter(&addr, &token_id.clone()).iter().for_each(|(nonce, amount)| {
                     if amount.eq(&BigUint::from(0u8)) {
                         return;
                     }
