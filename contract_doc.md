@@ -30,7 +30,7 @@ The staking contract for ctzn.city
 
 - **fakeClaim**(addr: `Address`) -> `BigUint`  
     Used to know how much can be claimed by an address 
-    
+
 - **setEcityTokenid**(ecity_tokenid: `TokenIdentifier`)
 - **setGnsTokenid**(gns_tokenid: `TokenIdentifier`)
 - **setExpTokenid**(exp_tokenid: `TokenIdentifier`)
