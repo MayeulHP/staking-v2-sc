@@ -15,8 +15,8 @@ ARG_1=0x$(echo -n $2 | xxd -p -u | tr -d '\n')  # 1: gns_tokenid (TokenIdentifie
 ARG_2=0x$(echo -n $3 | xxd -p -u | tr -d '\n')  # 2: exp_tokenid (TokenIdentifier)
 ARG_3=0x$(echo -n $4 | xxd -p -u | tr -d '\n')  # 3: ctzn_tokenid (TokenIdentifier)
 ARG_4=${5}  # 4: router_address (Address)
-    erdpy contract build
-    erdpy contract deploy --bytecode output/staking-v2-sc.wasm --recall-nonce ${PRIVATE_KEY} --keyfile ${OWNER}.json --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send --outfile="deploy.interaction.json" \
+    mxpy contract build
+    mxpy contract deploy --bytecode output/staking-v2-sc.wasm --recall-nonce ${PRIVATE_KEY} --keyfile ${OWNER}.json --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send --outfile="deploy.interaction.json" \
         --arguments ${ARG_0} ${ARG_1} ${ARG_2} ${ARG_3} ${ARG_4} 
 
     echo "Deployed contract at the address written above."
@@ -31,7 +31,7 @@ ARG_1=0x$(echo -n $2 | xxd -p -u | tr -d '\n')  # 1: gns_tokenid (TokenIdentifie
 ARG_2=0x$(echo -n $3 | xxd -p -u | tr -d '\n')  # 2: exp_tokenid (TokenIdentifier)
 ARG_3=0x$(echo -n $4 | xxd -p -u | tr -d '\n')  # 3: ctzn_tokenid (TokenIdentifier)
 ARG_4=${5}  # 4: router_address (Address)
-    erdpy contract upgrade ${ADDRESS} --bytecode output/staking-v2-sc.wasm --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
+    mxpy contract upgrade ${ADDRESS} --bytecode output/staking-v2-sc.wasm --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --arguments ${ARG_0} ${ARG_1} ${ARG_2} ${ARG_3} ${ARG_4} 
 
 }
@@ -39,19 +39,19 @@ ARG_4=${5}  # 4: router_address (Address)
 # All contract endpoints are available as functions. Provide any arguments as needed (e.g transfer 12 TOKEN-123)
 
 depositEcity() {
-    erdpy contract call ${ADDRESS} \
+    mxpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "depositEcity" 
 }
 
 addEcity() {
-    erdpy contract call ${ADDRESS} \
+    mxpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "addEcity" 
 }
 
 stake() {
-    erdpy contract call ${ADDRESS} \
+    mxpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "stake" 
 }
@@ -60,7 +60,7 @@ unstakeSingle() {
 # Arguments: 
 ARG_0=0x$(echo -n $1 | xxd -p -u | tr -d '\n')  # 0: token_id (TokenIdentifier)
 ARG_1=${2}  # 1: nonce (u64)
-    erdpy contract call ${ADDRESS} \
+    mxpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "unstakeSingle" \
         --arguments ${ARG_0} ${ARG_1} 
@@ -70,7 +70,7 @@ ARG_1=${2}  # 1: nonce (u64)
 unstake() {
 # Arguments: 
 ARG_0=${1}  # 0: payments (variadic<tuple<TokenIdentifier,u64,u64>>)
-    erdpy contract call ${ADDRESS} \
+    mxpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "unstake" \
         --arguments ${ARG_0} 
@@ -81,7 +81,7 @@ claimEcity() {
 # Arguments: 
 ARG_0=${1}  # 0: episode (u64)
 ARG_1=${2}  # 1: addr (Address)
-    erdpy contract call ${ADDRESS} \
+    mxpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "claimEcity" \
         --arguments ${ARG_0} ${ARG_1} 
@@ -89,7 +89,7 @@ ARG_1=${2}  # 1: addr (Address)
 }
 
 claim() {
-    erdpy contract call ${ADDRESS} \
+    mxpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "claim" 
 }
@@ -97,7 +97,7 @@ claim() {
 fakeClaim() {
 # Arguments: 
 ARG_0=${1}  # 0: addr (Address)
-    erdpy contract call ${ADDRESS} \
+    mxpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "fakeClaim" \
         --arguments ${ARG_0} 
@@ -107,7 +107,7 @@ ARG_0=${1}  # 0: addr (Address)
 claimUnclaimable() {
 # Arguments: 
 ARG_0=${1}  # 0: episode (u64)
-    erdpy contract call ${ADDRESS} \
+    mxpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "claimUnclaimable" \
         --arguments ${ARG_0} 
@@ -117,7 +117,7 @@ ARG_0=${1}  # 0: episode (u64)
 setEcityTokenid() {
 # Arguments: 
 ARG_0=0x$(echo -n $1 | xxd -p -u | tr -d '\n')  # 0: ecity_tokenid (TokenIdentifier)
-    erdpy contract call ${ADDRESS} \
+    mxpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "setEcityTokenid" \
         --arguments ${ARG_0} 
@@ -127,7 +127,7 @@ ARG_0=0x$(echo -n $1 | xxd -p -u | tr -d '\n')  # 0: ecity_tokenid (TokenIdentif
 setGnsTokenid() {
 # Arguments: 
 ARG_0=0x$(echo -n $1 | xxd -p -u | tr -d '\n')  # 0: gns_tokenid (TokenIdentifier)
-    erdpy contract call ${ADDRESS} \
+    mxpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "setGnsTokenid" \
         --arguments ${ARG_0} 
@@ -137,7 +137,7 @@ ARG_0=0x$(echo -n $1 | xxd -p -u | tr -d '\n')  # 0: gns_tokenid (TokenIdentifie
 setExpTokenid() {
 # Arguments: 
 ARG_0=0x$(echo -n $1 | xxd -p -u | tr -d '\n')  # 0: exp_tokenid (TokenIdentifier)
-    erdpy contract call ${ADDRESS} \
+    mxpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "setExpTokenid" \
         --arguments ${ARG_0} 
@@ -147,7 +147,7 @@ ARG_0=0x$(echo -n $1 | xxd -p -u | tr -d '\n')  # 0: exp_tokenid (TokenIdentifie
 setCtznTokenid() {
 # Arguments: 
 ARG_0=0x$(echo -n $1 | xxd -p -u | tr -d '\n')  # 0: ctzn_tokenid (TokenIdentifier)
-    erdpy contract call ${ADDRESS} \
+    mxpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "setCtznTokenid" \
         --arguments ${ARG_0} 
@@ -157,7 +157,7 @@ ARG_0=0x$(echo -n $1 | xxd -p -u | tr -d '\n')  # 0: ctzn_tokenid (TokenIdentifi
 setRouterAddress() {
 # Arguments: 
 ARG_0=${1}  # 0: router_address (Address)
-    erdpy contract call ${ADDRESS} \
+    mxpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "setRouterAddress" \
         --arguments ${ARG_0} 
@@ -169,7 +169,7 @@ ARG_0=${1}  # 0: router_address (Address)
 nbStaked() {
 # Arguments: 
 ARG_0=${1}  # 0: user (Address)
-    erdpy contract query ${ADDRESS} \
+    mxpy contract query ${ADDRESS} \
         --function "nbStaked" \
         --proxy=${PROXY} \
          --arguments ${ARG_0} 
@@ -177,7 +177,7 @@ ARG_0=${1}  # 0: user (Address)
 }
 
 nbPlayers() {
-    erdpy contract query ${ADDRESS} \
+    mxpy contract query ${ADDRESS} \
         --function "nbPlayers" \
         --proxy=${PROXY} 
 }
