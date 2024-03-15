@@ -1,11 +1,11 @@
 # Replace the following with your own values (You need to run the script once to get the contract address)
-ADDRESS="erd1qqq...xxx"
-OWNER="erd1...xxx"
+ADDRESS="erd1qqqqqqqqqqqqqpgq69at3tsz6tnrnuunkrjlqeg3whetxecusdps8glwdn"
+OWNER="erd1hpcwz6fl7jeytmq0thkc0xu783sjlh9c3xx29rtsrd7ks09xsdps6m3cyu"
 # Place your keystore file in the same directory as this script and replace the following with the name of the file
 # Optionally, you can also put your password in the .passfile in the same directory as this script (if not, you will be prompted for the password)
-PRIVATE_KEY=(--keyfile=erd1...xxx.json --passfile=.passfile)
-PROXY=https://devnet-api.elrond.com
-CHAIN_ID=D
+PRIVATE_KEY=(--keyfile=erd1hpcwz6fl7jeytmq0thkc0xu783sjlh9c3xx29rtsrd7ks09xsdps6m3cyu.json --passfile=.passfile)
+PROXY=https://gateway.multiversx.com
+CHAIN_ID=1
 
 # Standard deploy command. Provide any constructor arguments as needed (e.g deploy 12 TOKEN-123456). Numbers are automatically scaled to 18 decimals. (e.g. 12 -> 12000000000000000000)
 deploy() {

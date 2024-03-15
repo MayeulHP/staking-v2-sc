@@ -1,0 +1,366 @@
+{
+    "name": "double_deposit",
+    "comment": "The router deposits some ECITY, then the owner deposits some more ECITY through the addEcity endpoint",
+    "steps": [
+        {
+            "step": "externalSteps",
+            "path": "deploy.scen.json"
+        },
+        {
+            "step": "setState",
+            "accounts": {
+                "address:router": {
+                    "nonce": "1",
+                    "balance": "0",
+                    "esdt": {
+                        "str:ECITY-2a383a": "7115000000000000000000"
+                    }
+                },
+                "address:owner": {
+                    "nonce": "1",
+                    "balance": "0",
+                    "esdt": {
+                        "str:ECITY-2a383a": "1000000000000000000000"
+                    }
+                },
+                "address:stakerClassics": {
+                    "nonce": "1",
+                    "balance": "0",
+                    "esdt": {
+                        "str:ECITY-2a383a": "0",
+                        "str:GNS-8fb061": {
+                            "instances": [
+                                {
+                                    "balance": "1",
+                                    "nonce": "1"
+                                },
+                                {
+                                    "balance": "1",
+                                    "nonce": "3"
+                                }
+                            ]
+                        },
+                        "str:EXP-aff411": {
+                            "instances": [
+                                {
+                                    "balance": "1",
+                                    "nonce": "1"
+                                },
+                                {
+                                    "balance": "1",
+                                    "nonce": "4"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "address:stakerLegendaries": {
+                    "nonce": "1",
+                    "balance": "0",
+                    "esdt": {
+                        "str:ECITY-2a383a": "0",
+                        "str:GNS-8fb061": {
+                            "instances": [
+                                {
+                                    "balance": "1",
+                                    "nonce": "2"
+                                },
+                                {
+                                    "balance": "1",
+                                    "nonce": "4"
+                                }
+                            ]
+                        },
+                        "str:EXP-aff411": {
+                            "instances": [
+                                {
+                                    "balance": "1",
+                                    "nonce": "3"
+                                },
+                                {
+                                    "balance": "1",
+                                    "nonce": "6"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "currentBlockInfo": {
+                "blockTimestamp": "1000"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "routerSetting",
+            "comment": "Set the router contract address, calling setRouterAddress()",
+            "tx": {
+                "from": "address:owner",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "function": "setRouterAddress",
+                "arguments": [
+                    "address:router"
+                ],
+                "gasLimit": "5,000,000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "depositEcity",
+            "comment": "Deposit 7115 ECITY through the router, calling depositEcity()",
+            "tx": {
+                "from": "address:router",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "esdtValue": [
+                    {
+                        "tokenIdentifier": "str:ECITY-2a383a",
+                        "value": "7115000000000000000000"
+                    }
+                ],
+                "function": "depositEcity",
+                "gasLimit": "5000000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "addEcity",
+            "comment": "Deposit 1000 ECITY through the owner, calling addEcity()",
+            "tx": {
+                "from": "address:owner",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "esdtValue": [
+                    {
+                        "tokenIdentifier": "str:ECITY-2a383a",
+                        "value": "1000000000000000000000"
+                    }
+                ],
+                "function": "addEcity",
+                "gasLimit": "5000000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "stakerClassicsStake",
+            "comment": "Staker classic staking all NFTs, calling stake()",
+            "tx": {
+                "from": "address:stakerClassics",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "esdtValue": [
+                    {
+                        "tokenIdentifier": "str:GNS-8fb061",
+                        "nonce": "1",
+                        "value": "1"
+                    },
+                    {
+                        "tokenIdentifier": "str:GNS-8fb061",
+                        "nonce": "3",
+                        "value": "1"
+                    },
+                    {
+                        "tokenIdentifier": "str:EXP-aff411",
+                        "nonce": "1",
+                        "value": "1"
+                    },
+                    {
+                        "tokenIdentifier": "str:EXP-aff411",
+                        "nonce": "4",
+                        "value": "1"
+                    }
+                ],
+                "function": "stake",
+                "gasLimit": "5000000000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0"
+            }
+        },
+        {
+            "step": "setState",
+            "comment": "Set the block timestamp to 2 days later",
+            "currentBlockInfo": {
+                "blockTimestamp": "173800"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "stakerLegendariesStake",
+            "comment": "Staker legendaries staking all NFTs, calling stake()",
+            "tx": {
+                "from": "address:stakerLegendaries",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "esdtValue": [
+                    {
+                        "tokenIdentifier": "str:GNS-8fb061",
+                        "nonce": "2",
+                        "value": "1"
+                    },
+                    {
+                        "tokenIdentifier": "str:GNS-8fb061",
+                        "nonce": "4",
+                        "value": "1"
+                    },
+                    {
+                        "tokenIdentifier": "str:EXP-aff411",
+                        "nonce": "3",
+                        "value": "1"
+                    },
+                    {
+                        "tokenIdentifier": "str:EXP-aff411",
+                        "nonce": "6",
+                        "value": "1"
+                    }
+                ],
+                "function": "stake",
+                "gasLimit": "5000000000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0"
+            }
+        },
+        {
+            "step": "setState",
+            "comment": "Set the block timestamp to 3 weeks later",
+            "currentBlockInfo": {
+                "blockTimestamp": "1988200"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "claimRewards",
+            "comment": "StakerClassics claims the rewards, calling claim()",
+            "tx": {
+                "from": "address:stakerClassics",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "function": "claim",
+                "gasLimit": "5000000000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0"
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "claimRewards",
+            "comment": "StakerLegendary claims the rewards, calling claim()",
+            "tx": {
+                "from": "address:stakerLegendaries",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "function": "claim",
+                "gasLimit": "5000000000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0"
+            }
+        },
+        {
+            "step": "checkState",
+            "accounts": {
+                "address:stakerClassics": {
+                    "nonce": "3",
+                    "esdt": {
+                        "str:ECITY-2a383a": "2111082206035379812",
+                        "str:GNS-8fb061": {
+                            "instances": [
+                                {
+                                    "balance": "0",
+                                    "nonce": "1"
+                                },
+                                {
+                                    "balance": "0",
+                                    "nonce": "3"
+                                }
+                            ]
+                        },
+                        "str:EXP-aff411": {
+                            "instances": [
+                                {
+                                    "balance": "0",
+                                    "nonce": "1"
+                                },
+                                {
+                                    "balance": "0",
+                                    "nonce": "4"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "address:stakerLegendaries": {
+                    "nonce": "3",
+                    "esdt": {
+                        "str:ECITY-2a383a": "65443548387096774192",
+                        "str:GNS-8fb061": {
+                            "instances": [
+                                {
+                                    "balance": "0",
+                                    "nonce": "2"
+                                },
+                                {
+                                    "balance": "0",
+                                    "nonce": "4"
+                                }
+                            ]
+                        },
+                        "str:EXP-aff411": {
+                            "instances": [
+                                {
+                                    "balance": "0",
+                                    "nonce": "3"
+                                },
+                                {
+                                    "balance": "0",
+                                    "nonce": "6"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "+": ""
+            }
+        },
+        {
+            "step": "scCall",
+            "txId": "unstakeClassics",
+            "comment": "StakerClassics unstakes his NFTs, calling unstake(tuple<TokenIdentifier, u64, u64>)",
+            "tx": {
+                "from": "address:stakerClassics",
+                "to": "sc:stakingSc",
+                "egldValue": "0",
+                "function": "unstakeSingle",
+                "arguments": [
+                    "str:GNS-8fb061", "1"
+                ],
+                "gasLimit": "5000000000000",
+                "gasPrice": "0"
+            },
+            "expect": {
+                "status": "0",
+                "gas": "*",
+                "refund": "*"
+            }
+        }
+    ]
+}
