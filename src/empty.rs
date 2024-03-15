@@ -356,8 +356,8 @@ pub trait StakingV2ScContract:
         sc_print!("Last episode claimed: {}", self.last_episode_claimed(&caller).get());
     }
 
-    //#[view(fakeClaim)]
-    #[endpoint(fakeClaim)]
+    //#[endpoint(fakeClaim)]
+    #[view(fakeClaim)]    
     fn fake_claim(&self, addr: &ManagedAddress) -> BigUint<Self::Api> {
         // Counts the amount of ECITY that can be claimed by an address if the claim function was called
 
@@ -415,34 +415,34 @@ pub trait StakingV2ScContract:
     }
 
     // Setters for all that is set in the init function
-    //#[only_owner]
+    #[only_owner]
     #[endpoint(setEcityTokenid)]
     fn set_ecity_tokenid(&self, ecity_tokenid: TokenIdentifier) {
         self.ecity_tokenid().set_token_id(ecity_tokenid);
     }
 
-    //#[only_owner]
+    #[only_owner]
     #[endpoint(setGnsTokenid)]
     fn set_gns_tokenid(&self, gns_tokenid: TokenIdentifier) {
         self.genesis_tokenid().set_token_id(gns_tokenid.clone());
         self.collections().insert(gns_tokenid);
     }
 
-    //#[only_owner]
+    #[only_owner]
     #[endpoint(setExpTokenid)]
     fn set_exp_tokenid(&self, exp_tokenid: TokenIdentifier) {
         self.expansion_tokenid().set_token_id(exp_tokenid.clone());
         self.collections().insert(exp_tokenid);
     }
 
-    //#[only_owner]
+    #[only_owner]
     #[endpoint(setCtznTokenid)]
     fn set_ctzn_tokenid(&self, ctzn_tokenid: TokenIdentifier) {
         self.citizen_tokenid().set_token_id(ctzn_tokenid.clone());
         self.collections().insert(ctzn_tokenid);
     }
 
-    //#[only_owner]
+    #[only_owner]
     #[endpoint(setRouterAddress)]
     fn set_router_address(&self, router_address: ManagedAddress) {
         self.router_address().set(router_address);
