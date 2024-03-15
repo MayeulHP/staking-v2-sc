@@ -105,7 +105,7 @@ pub trait StakingV2ScContract:
         let exp_rarity_fund = exp_fund.clone() / BigUint::from(3u8); // There are 3 rarities of Expansion buildings
 
         let building_reward = match building_rarity {
-            BuildingRarity::ExpansionClassic => exp_rarity_fund / BigUint::from(3500u16), // 3500 Expansion Classic buildings
+            BuildingRarity::ExpansionClassic => exp_rarity_fund / BigUint::from(3560u16), // 3500 Expansion Classic buildings
             BuildingRarity::ExpansionRare => exp_rarity_fund / BigUint::from(400u16), // 400 Expansion Rare buildings
             BuildingRarity::ExpansionLegendary => exp_rarity_fund / BigUint::from(40u8), // 40 Expansion Legendary buildings
             _ => BigUint::from(0u8)
