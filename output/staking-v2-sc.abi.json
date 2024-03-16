@@ -47,6 +47,80 @@
     },
     "endpoints": [
         {
+            "name": "upgrade",
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "routerAddress",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "staked",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "user",
+                    "type": "Address"
+                },
+                {
+                    "name": "token_id",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "nonce",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "name": "stakedIter",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "user",
+                    "type": "Address"
+                },
+                {
+                    "name": "token_id",
+                    "type": "TokenIdentifier"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "variadic<tuple<u64,BigUint>>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "stakedTime",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "user",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
             "name": "nbStaked",
             "mutability": "readonly",
             "inputs": [
@@ -68,6 +142,76 @@
             "outputs": [
                 {
                     "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "lastEpisodeClaimed",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "user",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "episodesTimestamps",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "episode",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "episodesRewards",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "episode",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "name": "currentEpisode",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "claimedPerEpisode",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "episode",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "BigUint"
                 }
             ]
         },
@@ -148,7 +292,7 @@
         },
         {
             "name": "fakeClaim",
-            "mutability": "mutable",
+            "mutability": "readonly",
             "inputs": [
                 {
                     "name": "addr",
@@ -175,6 +319,7 @@
         },
         {
             "name": "setEcityTokenid",
+            "onlyOwner": true,
             "mutability": "mutable",
             "inputs": [
                 {
@@ -186,6 +331,7 @@
         },
         {
             "name": "setGnsTokenid",
+            "onlyOwner": true,
             "mutability": "mutable",
             "inputs": [
                 {
@@ -197,6 +343,7 @@
         },
         {
             "name": "setExpTokenid",
+            "onlyOwner": true,
             "mutability": "mutable",
             "inputs": [
                 {
@@ -208,6 +355,7 @@
         },
         {
             "name": "setCtznTokenid",
+            "onlyOwner": true,
             "mutability": "mutable",
             "inputs": [
                 {
@@ -219,6 +367,7 @@
         },
         {
             "name": "setRouterAddress",
+            "onlyOwner": true,
             "mutability": "mutable",
             "inputs": [
                 {
