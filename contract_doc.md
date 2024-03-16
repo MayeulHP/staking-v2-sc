@@ -6,6 +6,13 @@ The staking contract for ctzn.city
 
 ### onlyOwner
 - **claimUnclaimable**(episode: `u64`)
+- **setEcityTokenid**(ecity_tokenid: `TokenIdentifier`)
+- **setGnsTokenid**(gns_tokenid: `TokenIdentifier`)
+- **setExpTokenid**(exp_tokenid: `TokenIdentifier`)
+- **setCtznTokenid**(ctzn_tokenid: `TokenIdentifier`)
+- **setRouterAddress**(router_address: `Address`)
+
+### Public
 
 ### Public
 - **depositEcity**()  
@@ -28,16 +35,11 @@ The staking contract for ctzn.city
 - **claim**()  
     Used to claim all episodes that haven't been claimed yet.  
 
-- **fakeClaim**(addr: `Address`) -> `BigUint`  
-    Used to know how much can be claimed by an address 
-
-- **setEcityTokenid**(ecity_tokenid: `TokenIdentifier`)
-- **setGnsTokenid**(gns_tokenid: `TokenIdentifier`)
-- **setExpTokenid**(exp_tokenid: `TokenIdentifier`)
-- **setCtznTokenid**(ctzn_tokenid: `TokenIdentifier`)
-- **setRouterAddress**(router_address: `Address`)
-
 ### Readonly
 - **nbStaked**(user: `Address`) -> `u64`  
+
 - **nbPlayers**() -> `u64`  
+
+- **fakeClaim**(addr: `Address`) -> `BigUint`  
+    Used to know how much can be claimed by an address 
 
