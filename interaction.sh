@@ -1,11 +1,13 @@
 # Replace the following with your own values (You need to run the script once to get the contract address)
-ADDRESS="erd1qqqqqqqqqqqqqpgq69at3tsz6tnrnuunkrjlqeg3whetxecusdps8glwdn"
+ADDRESS="erd1qqqqqqqqqqqqqpgq75u6xaaa4yfzrddhpvxzwqrdvt7wjzxfsdpstk9fzx"
 OWNER="erd1hpcwz6fl7jeytmq0thkc0xu783sjlh9c3xx29rtsrd7ks09xsdps6m3cyu"
 # Place your keystore file in the same directory as this script and replace the following with the name of the file
 # Optionally, you can also put your password in the .passfile in the same directory as this script (if not, you will be prompted for the password)
 PRIVATE_KEY=(--keyfile=erd1hpcwz6fl7jeytmq0thkc0xu783sjlh9c3xx29rtsrd7ks09xsdps6m3cyu.json --passfile=.passfile)
 PROXY=https://gateway.multiversx.com
 CHAIN_ID=1
+TOKEN_IDENTIFIER="ECITY-2a383a"
+TOKEN_NONCE=0
 
 # Standard deploy command. Provide any constructor arguments as needed (e.g deploy 12 TOKEN-123456). Numbers are automatically scaled to 18 decimals. (e.g. 12 -> 12000000000000000000)
 deploy() {
@@ -31,7 +33,7 @@ ARG_1=0x$(echo -n $2 | xxd -p -u | tr -d '\n')  # 1: gns_tokenid (TokenIdentifie
 ARG_2=0x$(echo -n $3 | xxd -p -u | tr -d '\n')  # 2: exp_tokenid (TokenIdentifier)
 ARG_3=0x$(echo -n $4 | xxd -p -u | tr -d '\n')  # 3: ctzn_tokenid (TokenIdentifier)
 ARG_4=${5}  # 4: router_address (Address)
-    mxpy contract upgrade ${ADDRESS} --bytecode output/staking-v2-sc.wasm --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
+    mxpy contract upgrade ${ADDRESS} --bytecode output/staking-v2-sc.wasm --recall-nonce ${PRIVATE_KEY} --keyfile "${OWNER}.json" --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --arguments ${ARG_0} ${ARG_1} ${ARG_2} ${ARG_3} ${ARG_4} 
 
 }
@@ -39,6 +41,22 @@ ARG_4=${5}  # 4: router_address (Address)
 # All contract endpoints are available as functions. Provide any arguments as needed (e.g transfer 12 TOKEN-123)
 
 depositEcity() {
+    token_name="0x$(echo -n ${TOKEN_IDENTIFIER} | xxd -p -u | tr -d '\n')"
+    nonce=${TOKEN_NONCE}
+    amount=$(echo "scale=0; (${1}*10^18)/1" | bc -l) # Lets you enter it as 0.05 instead of 50000000000000000
+    sc_function="0x$(echo -n 'depositEcity' | xxd -p -u | tr -d '\n')"
+    sc_address="0x$(mxpy wallet bech32 --decode ${ADDRESS})"
+
+    mxpy --verbose contract call ${ADDRESS} --recall-nonce ${PRIVATE_KEY} \
+            --gas-limit=50000000 \
+            --proxy=${PROXY} --chain=${CHAIN_ID} \
+            --function="ESDTTransfer" \
+            --arguments ${token_name} ${amount} ${sc_function}\
+            --send
+    echo $?
+}
+
+depositEcity_deprecated() {
     mxpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "depositEcity" 
@@ -92,16 +110,6 @@ claim() {
     mxpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "claim" 
-}
-
-fakeClaim() {
-# Arguments: 
-ARG_0=${1}  # 0: addr (Address)
-    mxpy contract call ${ADDRESS} \
-        --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
-        --function "fakeClaim" \
-        --arguments ${ARG_0} 
-
 }
 
 claimUnclaimable() {
@@ -180,5 +188,15 @@ nbPlayers() {
     mxpy contract query ${ADDRESS} \
         --function "nbPlayers" \
         --proxy=${PROXY} 
+}
+
+fakeClaim() {
+# Arguments: 
+ARG_0=${1}  # 0: addr (Address)
+    mxpy contract query ${ADDRESS} \
+        --function "fakeClaim" \
+        --proxy=${PROXY} \
+         --arguments ${ARG_0} 
+
 }
 
