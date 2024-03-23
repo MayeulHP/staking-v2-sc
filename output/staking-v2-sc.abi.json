@@ -216,6 +216,21 @@
             ]
         },
         {
+            "name": "allStakedTokens",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "user",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "List<tuple<TokenIdentifier,u64,BigUint>>"
+                }
+            ]
+        },
+        {
             "name": "depositEcity",
             "mutability": "mutable",
             "payableInTokens": [
