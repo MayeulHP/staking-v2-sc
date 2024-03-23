@@ -39,36 +39,26 @@ upgrade() {
 
 # All contract endpoints are available as functions. Provide any arguments as needed (e.g transfer 12 TOKEN-123)
 
-depositEcity() {
-    token_name="0x$(echo -n ${TOKEN_IDENTIFIER} | xxd -p -u | tr -d '\n')"
-    nonce=${TOKEN_NONCE}
-    amount=$(echo "scale=0; (${1}*10^18)/1" | bc -l) # Lets you enter it as 0.05 instead of 50000000000000000
-    sc_function="0x$(echo -n 'depositEcity' | xxd -p -u | tr -d '\n')"
-    sc_address="0x$(mxpy wallet bech32 --decode ${ADDRESS})"
-
-    mxpy --verbose contract call ${ADDRESS} --recall-nonce ${PRIVATE_KEY} \
-            --gas-limit=50000000 \
-            --proxy=${PROXY} --chain=${CHAIN_ID} \
-            --function="ESDTTransfer" \
-            --arguments ${token_name} ${amount} ${sc_function}\
-            --send
-    echo $?
+upgrade() {
+    erdpy contract call ${ADDRESS} \
+        --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
+        --function "upgrade" 
 }
 
-depositEcity_deprecated() {
-    mxpy contract call ${ADDRESS} \
+depositEcity() {
+    erdpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "depositEcity" 
 }
 
 addEcity() {
-    mxpy contract call ${ADDRESS} \
+    erdpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "addEcity" 
 }
 
 stake() {
-    mxpy contract call ${ADDRESS} \
+    erdpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "stake" 
 }
@@ -77,7 +67,7 @@ unstakeSingle() {
 # Arguments: 
 ARG_0=0x$(echo -n $1 | xxd -p -u | tr -d '\n')  # 0: token_id (TokenIdentifier)
 ARG_1=${2}  # 1: nonce (u64)
-    mxpy contract call ${ADDRESS} \
+    erdpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "unstakeSingle" \
         --arguments ${ARG_0} ${ARG_1} 
@@ -87,7 +77,7 @@ ARG_1=${2}  # 1: nonce (u64)
 unstake() {
 # Arguments: 
 ARG_0=${1}  # 0: payments (variadic<tuple<TokenIdentifier,u64,u64>>)
-    mxpy contract call ${ADDRESS} \
+    erdpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "unstake" \
         --arguments ${ARG_0} 
@@ -98,7 +88,7 @@ claimEcity() {
 # Arguments: 
 ARG_0=${1}  # 0: episode (u64)
 ARG_1=${2}  # 1: addr (Address)
-    mxpy contract call ${ADDRESS} \
+    erdpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "claimEcity" \
         --arguments ${ARG_0} ${ARG_1} 
@@ -106,7 +96,7 @@ ARG_1=${2}  # 1: addr (Address)
 }
 
 claim() {
-    mxpy contract call ${ADDRESS} \
+    erdpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "claim" 
 }
@@ -114,7 +104,7 @@ claim() {
 claimUnclaimable() {
 # Arguments: 
 ARG_0=${1}  # 0: episode (u64)
-    mxpy contract call ${ADDRESS} \
+    erdpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "claimUnclaimable" \
         --arguments ${ARG_0} 
@@ -124,7 +114,7 @@ ARG_0=${1}  # 0: episode (u64)
 setEcityTokenid() {
 # Arguments: 
 ARG_0=0x$(echo -n $1 | xxd -p -u | tr -d '\n')  # 0: ecity_tokenid (TokenIdentifier)
-    mxpy contract call ${ADDRESS} \
+    erdpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "setEcityTokenid" \
         --arguments ${ARG_0} 
@@ -134,7 +124,7 @@ ARG_0=0x$(echo -n $1 | xxd -p -u | tr -d '\n')  # 0: ecity_tokenid (TokenIdentif
 setGnsTokenid() {
 # Arguments: 
 ARG_0=0x$(echo -n $1 | xxd -p -u | tr -d '\n')  # 0: gns_tokenid (TokenIdentifier)
-    mxpy contract call ${ADDRESS} \
+    erdpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "setGnsTokenid" \
         --arguments ${ARG_0} 
@@ -144,7 +134,7 @@ ARG_0=0x$(echo -n $1 | xxd -p -u | tr -d '\n')  # 0: gns_tokenid (TokenIdentifie
 setExpTokenid() {
 # Arguments: 
 ARG_0=0x$(echo -n $1 | xxd -p -u | tr -d '\n')  # 0: exp_tokenid (TokenIdentifier)
-    mxpy contract call ${ADDRESS} \
+    erdpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "setExpTokenid" \
         --arguments ${ARG_0} 
@@ -154,7 +144,7 @@ ARG_0=0x$(echo -n $1 | xxd -p -u | tr -d '\n')  # 0: exp_tokenid (TokenIdentifie
 setCtznTokenid() {
 # Arguments: 
 ARG_0=0x$(echo -n $1 | xxd -p -u | tr -d '\n')  # 0: ctzn_tokenid (TokenIdentifier)
-    mxpy contract call ${ADDRESS} \
+    erdpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "setCtznTokenid" \
         --arguments ${ARG_0} 
@@ -164,7 +154,7 @@ ARG_0=0x$(echo -n $1 | xxd -p -u | tr -d '\n')  # 0: ctzn_tokenid (TokenIdentifi
 setRouterAddress() {
 # Arguments: 
 ARG_0=${1}  # 0: router_address (Address)
-    mxpy contract call ${ADDRESS} \
+    erdpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "setRouterAddress" \
         --arguments ${ARG_0} 
@@ -172,20 +162,60 @@ ARG_0=${1}  # 0: router_address (Address)
 }
 
 addToCollections() {
-# Arguments:
-ARG_0=0x$(echo -n $1 | xxd -p -u | tr -d '\n')  # 0: (TokenIdentifier)
-    mxpy contract call ${ADDRESS} \
+# Arguments: 
+ARG_0=0x$(echo -n $1 | xxd -p -u | tr -d '\n')  # 0: token_id (TokenIdentifier)
+    erdpy contract call ${ADDRESS} \
         --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
         --function "addToCollections" \
-        --arguments ${ARG_0}
+        --arguments ${ARG_0} 
+
 }
 
 # All contract views. Provide arguments as needed (e.g balanceOf 0x1234567890123456789012345678901234567890)
 
+routerAddress() {
+    erdpy contract query ${ADDRESS} \
+        --function "routerAddress" \
+        --proxy=${PROXY} 
+}
+
+staked() {
+# Arguments: 
+ARG_0=${1}  # 0: user (Address)
+ARG_1=0x$(echo -n $2 | xxd -p -u | tr -d '\n')  # 1: token_id (TokenIdentifier)
+ARG_2=${3}  # 2: nonce (u64)
+    erdpy contract query ${ADDRESS} \
+        --function "staked" \
+        --proxy=${PROXY} \
+         --arguments ${ARG_0} ${ARG_1} ${ARG_2} 
+
+}
+
+stakedIter() {
+# Arguments: 
+ARG_0=${1}  # 0: user (Address)
+ARG_1=0x$(echo -n $2 | xxd -p -u | tr -d '\n')  # 1: token_id (TokenIdentifier)
+    erdpy contract query ${ADDRESS} \
+        --function "stakedIter" \
+        --proxy=${PROXY} \
+         --arguments ${ARG_0} ${ARG_1} 
+
+}
+
+stakedTime() {
+# Arguments: 
+ARG_0=${1}  # 0: user (Address)
+    erdpy contract query ${ADDRESS} \
+        --function "stakedTime" \
+        --proxy=${PROXY} \
+         --arguments ${ARG_0} 
+
+}
+
 nbStaked() {
 # Arguments: 
 ARG_0=${1}  # 0: user (Address)
-    mxpy contract query ${ADDRESS} \
+    erdpy contract query ${ADDRESS} \
         --function "nbStaked" \
         --proxy=${PROXY} \
          --arguments ${ARG_0} 
@@ -193,15 +223,61 @@ ARG_0=${1}  # 0: user (Address)
 }
 
 nbPlayers() {
-    mxpy contract query ${ADDRESS} \
+    erdpy contract query ${ADDRESS} \
         --function "nbPlayers" \
         --proxy=${PROXY} 
+}
+
+lastEpisodeClaimed() {
+# Arguments: 
+ARG_0=${1}  # 0: user (Address)
+    erdpy contract query ${ADDRESS} \
+        --function "lastEpisodeClaimed" \
+        --proxy=${PROXY} \
+         --arguments ${ARG_0} 
+
+}
+
+episodesTimestamps() {
+# Arguments: 
+ARG_0=${1}  # 0: episode (u64)
+    erdpy contract query ${ADDRESS} \
+        --function "episodesTimestamps" \
+        --proxy=${PROXY} \
+         --arguments ${ARG_0} 
+
+}
+
+episodesRewards() {
+# Arguments: 
+ARG_0=${1}  # 0: episode (u64)
+    erdpy contract query ${ADDRESS} \
+        --function "episodesRewards" \
+        --proxy=${PROXY} \
+         --arguments ${ARG_0} 
+
+}
+
+currentEpisode() {
+    erdpy contract query ${ADDRESS} \
+        --function "currentEpisode" \
+        --proxy=${PROXY} 
+}
+
+claimedPerEpisode() {
+# Arguments: 
+ARG_0=${1}  # 0: episode (u64)
+    erdpy contract query ${ADDRESS} \
+        --function "claimedPerEpisode" \
+        --proxy=${PROXY} \
+         --arguments ${ARG_0} 
+
 }
 
 fakeClaim() {
 # Arguments: 
 ARG_0=${1}  # 0: addr (Address)
-    mxpy contract query ${ADDRESS} \
+    erdpy contract query ${ADDRESS} \
         --function "fakeClaim" \
         --proxy=${PROXY} \
          --arguments ${ARG_0} 
