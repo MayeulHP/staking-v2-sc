@@ -79,10 +79,15 @@ pub trait UtilsModule: crate::common::CommonModule
                 building_rarity: BuildingRarity::None
             };
         }
-        if token_identifier.unwrap() == self.genesis_tokenid().get_token_id() {
+        if token_identifier.clone().unwrap() == self.genesis_tokenid().get_token_id() {
             return self.get_genesis_building_attributes(nonce);
-        } else {
+        } else if token_identifier.unwrap() == self.expansion_tokenid().get_token_id() {
             return self.get_expansion_building_attributes(nonce);
+        } else {
+            return BuildingAttributes {
+                building_type: BuildingType::None,
+                building_rarity: BuildingRarity::None
+            };
         }
         
     }

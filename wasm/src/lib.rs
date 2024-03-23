@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           16
+// Endpoints:                           27
 // Async Callback (empty):               1
-// Total number of exported functions:  18
+// Total number of exported functions:  29
 
 #![no_std]
 
@@ -22,8 +22,18 @@ multiversx_sc_wasm_adapter::endpoints! {
     staking_v2_sc
     (
         init => init
+        upgrade => upgrade
+        routerAddress => router_address
+        staked => staked
+        stakedIter => staked_iter
+        stakedTime => staked_time
         nbStaked => nb_staked
         nbPlayers => nb_players
+        lastEpisodeClaimed => last_episode_claimed
+        episodesTimestamps => episodes_timestamps
+        episodesRewards => episodes_rewards
+        currentEpisode => current_episode
+        claimedPerEpisode => claimed_per_episode
         depositEcity => deposit_ecity
         addEcity => add_ecity
         stake => stake
@@ -38,6 +48,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         setExpTokenid => set_exp_tokenid
         setCtznTokenid => set_ctzn_tokenid
         setRouterAddress => set_router_address
+        addToCollections => add_to_collections
     )
 }
 

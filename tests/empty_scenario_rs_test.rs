@@ -13,6 +13,11 @@ fn long_stake_rs() {
 }
 
 #[test]
+fn double_deposit() {
+    world().run("scenarios/double_deposit.scen.json");
+}
+
+#[test]
 fn stake_one() {
     world().run("scenarios/stake_one.scen.json");
 }
@@ -22,9 +27,13 @@ fn complex_stake() {
     world().run("scenarios/complex_stake.scen.json");
 }
 
-/*
+
 #[test]
 fn long_stake() {
     world().run("scenarios/long_stake.scen.json");
 }
-*/
+
+#[test]
+fn stake_twice() {
+    world().run("scenarios/stake_twice.scen.json");
+}

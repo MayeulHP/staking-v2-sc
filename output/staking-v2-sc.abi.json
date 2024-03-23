@@ -319,7 +319,6 @@
         },
         {
             "name": "setEcityTokenid",
-            "onlyOwner": true,
             "mutability": "mutable",
             "inputs": [
                 {
@@ -331,7 +330,6 @@
         },
         {
             "name": "setGnsTokenid",
-            "onlyOwner": true,
             "mutability": "mutable",
             "inputs": [
                 {
@@ -343,7 +341,6 @@
         },
         {
             "name": "setExpTokenid",
-            "onlyOwner": true,
             "mutability": "mutable",
             "inputs": [
                 {
@@ -355,7 +352,6 @@
         },
         {
             "name": "setCtznTokenid",
-            "onlyOwner": true,
             "mutability": "mutable",
             "inputs": [
                 {
@@ -367,12 +363,22 @@
         },
         {
             "name": "setRouterAddress",
-            "onlyOwner": true,
             "mutability": "mutable",
             "inputs": [
                 {
                     "name": "router_address",
                     "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "addToCollections",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "token_id",
+                    "type": "TokenIdentifier"
                 }
             ],
             "outputs": []

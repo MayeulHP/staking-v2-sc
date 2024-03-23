@@ -28,13 +28,12 @@ ARG_4=${5}  # 4: router_address (Address)
 # Standard upgrade command. Provide any constructor arguments as needed (e.g upgrade 12 TOKEN-123). Numbers are automatically scaled to 18 decimals. (e.g. 12 -> 12000000000000000000)
 upgrade() {
 # Arguments: 
-ARG_0=0x$(echo -n $1 | xxd -p -u | tr -d '\n')  # 0: ecity_tokenid (TokenIdentifier)
-ARG_1=0x$(echo -n $2 | xxd -p -u | tr -d '\n')  # 1: gns_tokenid (TokenIdentifier)
-ARG_2=0x$(echo -n $3 | xxd -p -u | tr -d '\n')  # 2: exp_tokenid (TokenIdentifier)
-ARG_3=0x$(echo -n $4 | xxd -p -u | tr -d '\n')  # 3: ctzn_tokenid (TokenIdentifier)
-ARG_4=${5}  # 4: router_address (Address)
-    mxpy contract upgrade ${ADDRESS} --bytecode output/staking-v2-sc.wasm --recall-nonce ${PRIVATE_KEY} --keyfile "${OWNER}.json" --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
-        --arguments ${ARG_0} ${ARG_1} ${ARG_2} ${ARG_3} ${ARG_4} 
+#ARG_0=0x$(echo -n $1 | xxd -p -u | tr -d '\n')  # 0: ecity_tokenid (TokenIdentifier)
+#ARG_1=0x$(echo -n $2 | xxd -p -u | tr -d '\n')  # 1: gns_tokenid (TokenIdentifier)
+#ARG_2=0x$(echo -n $3 | xxd -p -u | tr -d '\n')  # 2: exp_tokenid (TokenIdentifier)
+#ARG_3=0x$(echo -n $4 | xxd -p -u | tr -d '\n')  # 3: ctzn_tokenid (TokenIdentifier)
+#ARG_4=${5}  # 4: router_address (Address)
+    mxpy contract upgrade ${ADDRESS} --bytecode output/staking-v2-sc.wasm --recall-nonce ${PRIVATE_KEY} --keyfile "${OWNER}.json" --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send
 
 }
 
@@ -170,6 +169,15 @@ ARG_0=${1}  # 0: router_address (Address)
         --function "setRouterAddress" \
         --arguments ${ARG_0} 
 
+}
+
+addToCollections() {
+# Arguments:
+ARG_0=0x$(echo -n $1 | xxd -p -u | tr -d '\n')  # 0: (TokenIdentifier)
+    mxpy contract call ${ADDRESS} \
+        --recall-nonce ${PRIVATE_KEY} --gas-limit=500000000 --proxy=${PROXY} --chain=${CHAIN_ID} --send \
+        --function "addToCollections" \
+        --arguments ${ARG_0}
 }
 
 # All contract views. Provide arguments as needed (e.g balanceOf 0x1234567890123456789012345678901234567890)

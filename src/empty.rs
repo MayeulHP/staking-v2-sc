@@ -23,17 +23,19 @@ pub trait StakingV2ScContract: common::CommonModule + utils::UtilsModule {
         router_address: ManagedAddress,
     ) {
         self.ecity_tokenid().set_if_empty(ecity_tokenid);
-        self.genesis_tokenid().set_if_empty(gns_tokenid);
-        self.expansion_tokenid().set_if_empty(exp_tokenid);
-        self.citizen_tokenid().set_if_empty(ctzn_tokenid);
+        self.genesis_tokenid().set_if_empty(gns_tokenid.clone());
+        self.expansion_tokenid().set_if_empty(exp_tokenid.clone());
+        self.citizen_tokenid().set_if_empty(ctzn_tokenid.clone());
         self.router_address().set_if_empty(router_address);
         self.current_episode().set_if_empty(0);
         self.episodes_timestamps(0u64).set_if_empty(0u64);
+        self.collections().insert(gns_tokenid);
+        self.collections().insert(exp_tokenid);
+        self.collections().insert(ctzn_tokenid);
     }
 
     #[upgrade]
-    fn upgrade(&self) {
-    }
+    fn upgrade(&self) {}
 
     #[view(routerAddress)]
     #[storage_mapper("routerAddress")]
@@ -149,9 +151,9 @@ pub trait StakingV2ScContract: common::CommonModule + utils::UtilsModule {
         let ctzn_rarity_fund = ctzn_fund / BigUint::from(3u8); // There are 3 rarities of citizens
 
         let citizen_reward = match ctzn_attributes.rarity_level {
-            1 => ctzn_rarity_fund / BigUint::from(7120u16), // 1000 Common citizens
-            2 => ctzn_rarity_fund / BigUint::from(800u16),  // 100 Rare citizens
-            3 => ctzn_rarity_fund / BigUint::from(80u8),    // 10 Legendary citizens
+            1 => ctzn_rarity_fund / BigUint::from(7120u16), // Common citizens
+            2 => ctzn_rarity_fund / BigUint::from(800u16),  // Rare citizens
+            3 => ctzn_rarity_fund / BigUint::from(80u8),    // Legendary citizens
             _ => BigUint::from(0u8),
         };
 
@@ -265,11 +267,10 @@ pub trait StakingV2ScContract: common::CommonModule + utils::UtilsModule {
             );
 
             self.staked(&caller, &payment.token_identifier, &payment.token_nonce)
-                .set(
-                    self.staked(&caller, &payment.token_identifier, &payment.token_nonce)
-                        .get()
-                        + &payment.amount,
-                );
+                .update(|x| {
+                    *x += &payment.amount;
+                    x.clone()
+                });
 
             // Add the amount to the staked_iter, if it's not already there
             if !self
@@ -280,14 +281,16 @@ pub trait StakingV2ScContract: common::CommonModule + utils::UtilsModule {
                 self.staked_iter(&caller, &payment.token_identifier)
                     .insert((payment.token_nonce, BigUint::from(1u8)));
             } else {
-                // If it's already there, update the amount
+                let old_amount = self
+                    .staked(&caller, &payment.token_identifier, &payment.token_nonce)
+                    .get();
+
                 self.staked_iter(&caller, &payment.token_identifier)
-                    .iter()
-                    .for_each(|(nonce, mut amount)| {
-                        if nonce == payment.token_nonce {
-                            amount += &payment.amount;
-                        }
-                    });
+                    .remove(&(payment.token_nonce, old_amount.clone()));
+
+                self.staked_iter(&caller, &payment.token_identifier)
+                    .insert((payment.token_nonce, old_amount + payment.amount.clone()));
+
             }
 
             // Update the number of players if nessessary
@@ -448,7 +451,7 @@ pub trait StakingV2ScContract: common::CommonModule + utils::UtilsModule {
 
         let mut to_be_sent = BigUint::from(0u8);
 
-        for episode in last_episode_claimed..self.current_episode().get() {
+        for episode in last_episode_claimed..(self.current_episode().get() + 1u64) {
             if self.episodes_rewards(episode).get() <= BigUint::zero() {
                 continue;
             }
@@ -512,36 +515,42 @@ pub trait StakingV2ScContract: common::CommonModule + utils::UtilsModule {
     }
 
     // Setters for all that is set in the init function
-    #[only_owner]
+    //#[only_owner]
     #[endpoint(setEcityTokenid)]
     fn set_ecity_tokenid(&self, ecity_tokenid: TokenIdentifier) {
         self.ecity_tokenid().set_token_id(ecity_tokenid);
     }
 
-    #[only_owner]
+    //#[only_owner]
     #[endpoint(setGnsTokenid)]
     fn set_gns_tokenid(&self, gns_tokenid: TokenIdentifier) {
         self.genesis_tokenid().set_token_id(gns_tokenid.clone());
         self.collections().insert(gns_tokenid);
     }
 
-    #[only_owner]
+    //#[only_owner]
     #[endpoint(setExpTokenid)]
     fn set_exp_tokenid(&self, exp_tokenid: TokenIdentifier) {
         self.expansion_tokenid().set_token_id(exp_tokenid.clone());
         self.collections().insert(exp_tokenid);
     }
 
-    #[only_owner]
+    //#[only_owner]
     #[endpoint(setCtznTokenid)]
     fn set_ctzn_tokenid(&self, ctzn_tokenid: TokenIdentifier) {
         self.citizen_tokenid().set_token_id(ctzn_tokenid.clone());
         self.collections().insert(ctzn_tokenid);
     }
 
-    #[only_owner]
+    //#[only_owner]
     #[endpoint(setRouterAddress)]
     fn set_router_address(&self, router_address: ManagedAddress) {
         self.router_address().set(router_address);
+    }
+
+    //#[only_owner]
+    #[endpoint(addToCollections)]
+    fn add_to_collections(&self, token_id: TokenIdentifier) {
+        self.collections().insert(token_id);
     }
 }
