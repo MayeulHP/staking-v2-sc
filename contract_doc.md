@@ -6,15 +6,10 @@ The staking contract for ctzn.city
 
 ### onlyOwner
 - **claimUnclaimable**(episode: `u64`)
-- **setEcityTokenid**(ecity_tokenid: `TokenIdentifier`)
-- **setGnsTokenid**(gns_tokenid: `TokenIdentifier`)
-- **setExpTokenid**(exp_tokenid: `TokenIdentifier`)
-- **setCtznTokenid**(ctzn_tokenid: `TokenIdentifier`)
-- **setRouterAddress**(router_address: `Address`)
 
 ### Public
+- **upgrade**()
 
-### Public
 - **depositEcity**()  
     Called by the router to deposit ECITY. Marks the beginning of each episode. Can only be called once per episode.  
 
@@ -34,12 +29,25 @@ The staking contract for ctzn.city
 
 - **claim**()  
     Used to claim all episodes that haven't been claimed yet.  
+    
+- **setEcityTokenid**(ecity_tokenid: `TokenIdentifier`)
+- **setGnsTokenid**(gns_tokenid: `TokenIdentifier`)
+- **setExpTokenid**(exp_tokenid: `TokenIdentifier`)
+- **setCtznTokenid**(ctzn_tokenid: `TokenIdentifier`)
+- **setRouterAddress**(router_address: `Address`)
+- **addToCollections**(token_id: `TokenIdentifier`)
 
 ### Readonly
+- **routerAddress**() -> `Address`  
+- **staked**(user: `Address`, token_id: `TokenIdentifier`, nonce: `u64`) -> `BigUint`  
+- **stakedIter**(user: `Address`, token_id: `TokenIdentifier`) -> `variadic<tuple<u64,BigUint>>`  
+- **stakedTime**(user: `Address`) -> `u64`  
 - **nbStaked**(user: `Address`) -> `u64`  
-
 - **nbPlayers**() -> `u64`  
-
+- **lastEpisodeClaimed**(user: `Address`) -> `u64`  
+- **episodesTimestamps**(episode: `u64`) -> `u64`  
+- **episodesRewards**(episode: `u64`) -> `BigUint`  
+- **currentEpisode**() -> `u64`  
+- **claimedPerEpisode**(episode: `u64`) -> `BigUint`  
 - **fakeClaim**(addr: `Address`) -> `BigUint`  
-    Used to know how much can be claimed by an address 
 
